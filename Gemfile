@@ -66,3 +66,11 @@ group :test do
   gem "capybara"
   gem "selenium-webdriver"
 end
+
+group :development do
+  gem 'rubocop', '1.71.2', require: false
+end
+
+group :production do
+  gem 'pg'
+end
