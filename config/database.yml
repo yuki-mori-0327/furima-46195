@@ -1,3 +1,29 @@
+
+default: &default
+  encoding: utf8
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+
+development:
+  <<: *default
+  adapter: postgresql
+  username: root
+  password:
+  host: localhost
+  database: furima_46195_development
+
+test:
+  <<: *default
+  adapter: postgresql
+  username: root
+  password:
+  host: localhost
+  database: furima_46195_test
+
+production:
+  <<: *default
+  adapter: postgresql
+  url: <%= ENV['DATABASE_URL'] %>
+=======
 # MySQL. Versions 5.5.8 and up are supported.
 #
 # Install the MySQL driver
