@@ -12,7 +12,7 @@ development:
 
 test:
   <<: *default
-  adapter: mysql2
+  adapter: postgresql
   username: root
   password:
   host: localhost
