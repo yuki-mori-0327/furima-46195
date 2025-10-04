@@ -1,0 +1,159 @@
+<header class="global-header">
+  <div class="container header-row">
+    <div class="h-left">
+      <%= image_tag "furima-logo-color.png", alt: "FURIMA", class: "h-logo" %>
+    </div>
+
+    <div class="h-search">
+      <%= form_with url: "#", method: :get, local: true, html: { class: "search-form" } do %>
+        <input type="text" name="q" placeholder="キーワードから探す" />
+        <button type="submit" aria-label="検索">
+          🔍
+        </button>
+      <% end %>
+    </div>
+
+    <nav class="h-auth">
+      <%= link_to "ログイン", (defined?(new_user_session_path) ? new_user_session_path : "#") %>
+      <%= link_to "新規登録", (defined?(new_user_registration_path) ? new_user_registration_path : "#"), class: "signup" %>
+    </nav>
+  </div>
+
+  <div class="container header-sub">
+    <nav class="h-categories">
+      <a href="#">カテゴリー</a>
+      <a href="#">ブランド</a>
+    </nav>
+  </div>
+</header>
+
+
+
+
+<section class="hero-visual">
+  <div class="container">
+    <div class="hero-box">
+      <%= image_tag "furima-header01.png", alt: "", class: "hero-bg" %>
+
+      <div class="hero-overlay">
+        <h1>人生を変えるフリマアプリ</h1>
+        <p>FURIMAはだれでもかんたんに出品・購入できる<br>フリマアプリです</p>
+        <div class="hero-cta">
+          <%= link_to "出品する", (defined?(new_item_path) ? new_item_path : "#"), class: "btn-primary" %>
+          <%= link_to "商品一覧", (defined?(items_path) ? items_path : "#"), class: "btn-outline" %>
+        </div>
+        <div class="store-badges">
+          <%= image_tag "app-store.svg",  alt: "App Store" %>
+          <%= image_tag "google-play.png", alt: "Google Play" %>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="reasons">
+  <h2 class="section-title">FURIMAが選ばれる3つの理由</h2>
+ <div class="underline"></div>
+  <div class="container">
+    <h2>FURIMAが選ばれる3つの理由</h2>
+    <div class="cards-3">
+      <article class="card">
+        <%= image_tag "furima-intro01.png", alt: "かんたん出品" %>
+        <h3><span>3分</span>ですぐに出品</h3>
+        <p>スマホで入力するだけで簡単に出品！</p>
+      </article>
+      <article class="card">
+        <%= image_tag "furima-intro02.png", alt: "使いやすい" %>
+        <h3><span>シンプル</span>で使いやすい</h3>
+        <p>検索も購入もスムーズ。</p>
+      </article>
+      <article class="card">
+        <%= image_tag "furima-intro03.png", alt: "お得" %>
+        <h3><span>手数料</span>お得</h3>
+        <p>お得に出品＆購入。</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="features">
+  <h2 class="section-title">FURIMAの特徴</h2>
+<div class="underline"></div>
+  <div class="container">
+    <h2>FURIMAの特徴</h2>
+    <ul class="feature-list">
+      <li>
+        <%= image_tag "furima-intro04.png", alt: "売り買い簡単" %>
+        <div>
+          <h3>簡単に売り買いできる</h3>
+          <p>いつでもどこでも出品・購入が可能。</p>
+        </div>
+      </li>
+      <li>
+        <%= image_tag "furima-intro05.png", alt: "振込" %>
+        <div>
+          <h3>売上金の振込に対応</h3>
+          <p>スムーズな振込で安心。</p>
+        </div>
+      </li>
+      <li>
+        <%= image_tag "furima-intro06.png", alt: "支払い" %>
+        <div>
+          <h3>様々な支払いに対応</h3>
+          <p>クレカやポイントなど。</p>
+        </div>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<section class="pickup">
+  <div class="container">
+    <div class="pickup-head">
+      <h2>ピックアップカテゴリー</h2>
+      <%= link_to "新規投稿商品", (defined?(items_path) ? items_path : "#") %>
+    </div>
+
+    <div class="grid-items">
+      <% if defined?(Item) && Item.exists? %>
+        <% Item.limit(8).order(created_at: :desc).each do |item| %>
+          <article class="item-card">
+            <%= link_to (defined?(item_path) ? item_path(item) : "#") do %>
+              <div class="thumb"><%= image_tag(item.try(:image_url) || "item-sample.png", alt: item.try(:name) || "item") %></div>
+              <h3><%= item.try(:name) || "商品" %></h3>
+              <p class="price"><%= number_to_currency(item.try(:price) || 19000, unit: "¥", precision: 0) %></p>
+              <p class="shipping"><%= item.try(:shipping_fee_burden) || "着払い(購入者負担)" %></p>
+            <% end %>
+          </article>
+        <% end %>
+      <% else %>
+        <% 8.times do |i| %>
+          <article class="item-card">
+            <a href="#">
+              <div class="thumb"><%= image_tag "item-sample.png", alt: "dummy" %></div>
+              <h3>サンプル商品 <%= i+1 %></h3>
+              <p class="price">¥19,000</p>
+              <p class="shipping">着払い(購入者負担)</p>
+            </a>
+          </article>
+        <% end %>
+      <% end %>
+    </div>
+
+    <div class="center mt-24">
+      <%= link_to "出品する", (defined?(new_item_path) ? new_item_path : "#"), class: "btn-primary lg" %>
+    </div>
+  </div>
+</section>
+
+<section class="download">
+  <div class="container">
+    <h2>今すぐ無料ダウンロード！</h2>
+    <div class="store-badges">
+      <%= image_tag "app-store.svg",  alt: "App Store" %>
+      <%= image_tag "google-play.png", alt: "Google Play" %>
+    </div>
+  </div>
+</section>
+

@@ -68,3 +68,5 @@ group :test do
   gem "selenium-webdriver"
 end
 
+gem 'devise'
+gem "sassc-rails", "~> 2.1"
