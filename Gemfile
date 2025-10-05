@@ -70,3 +70,5 @@ end
 
 gem 'devise'
 gem "sassc-rails", "~> 2.1"
+
+gem 'active_hash'
