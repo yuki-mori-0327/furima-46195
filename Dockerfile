@@ -1,62 +1,77 @@
 # syntax = docker/dockerfile:1
 
-# Make sure RUBY_VERSION matches the Ruby version in .ruby-version and Gemfile
 ARG RUBY_VERSION=3.2.0
-FROM registry.docker.com/library/ruby:$RUBY_VERSION-slim as base
-
-# Rails app lives here
+FROM ruby:${RUBY_VERSION}-slim AS base
 WORKDIR /rails
 
-# Set production environment
-ENV RAILS_ENV="production" \
-    BUNDLE_DEPLOYMENT="1" \
-    BUNDLE_PATH="/usr/local/bundle" \
-    BUNDLE_WITHOUT="development"
+# 本番向け bundler 設定
+ENV RAILS_ENV=production \
+    BUNDLE_DEPLOYMENT=1 \
+    BUNDLE_PATH=/usr/local/bundle \
+    BUNDLE_WITHOUT="development test"
 
+# ---------- Build stage ----------
+FROM base AS build
 
-# Throw-away build stage to reduce size of final image
-FROM base as build
-
-# Install packages needed to build gems
+# ネイティブ拡張＆PGのビルドに必要 / アセット用に Node.js 必須
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y build-essential default-libmysqlclient-dev git libvips pkg-config
+    apt-get install --no-install-recommends -y \
+      build-essential git pkg-config \
+      libpq-dev \
+      nodejs \
+      libvips && \
+    rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
 
-# Install application gems
+# 依存を先に入れてキャッシュを効かせる
 COPY Gemfile Gemfile.lock ./
+# ※ lock に Linux プラットフォームが無い場合は事前にローカルで
+#    `bundle lock --add-platform x86_64-linux` を実行しておく
 RUN bundle install && \
-    rm -rf ~/.bundle/ "${BUNDLE_PATH}"/ruby/*/cache "${BUNDLE_PATH}"/ruby/*/bundler/gems/*/.git && \
+    rm -rf ~/.bundle "$BUNDLE_PATH"/ruby/*/cache "$BUNDLE_PATH"/ruby/*/bundler/gems/*/.git && \
     bundle exec bootsnap precompile --gemfile
 
-# Copy application code
+# アプリ本体
 COPY . .
 
-# Precompile bootsnap code for faster boot times
-RUN bundle exec bootsnap precompile app/ lib/
+# Windows 改行対策 & bin 実行権限
+# アプリ本体
+COPY . .
 
-# Precompiling assets for production without requiring secret RAILS_MASTER_KEY
-RUN SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
+# 改行(LF化)と実行権限付与を確実に
+RUN set -eux; \
+    find bin -type f -maxdepth 1 -exec sed -i 's/\r$//' {} \; || true; \
+    find bin -type f -maxdepth 1 -exec chmod +x {} \; || true
 
+# bootsnap とアセットを build 時にプリコンパイル
+RUN bundle exec bootsnap precompile app/ lib/ || true
+# credentials を参照しないようダミーキーで precompile
+RUN SECRET_KEY_BASE_DUMMY=1 bundle exec rails assets:precompile
 
-# Final stage for app image
+# ---------- Final stage ----------
 FROM base
 
-# Install packages needed for deployment
+# ランタイムに必要なライブラリ（pg ランタイム / Node は一応残す）
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y curl default-mysql-client libvips && \
-    rm -rf /var/lib/apt/lists /var/cache/apt/archives
+    apt-get install --no-install-recommends -y \
+      curl \
+      libpq5 \
+      nodejs \
+      libvips && \
+    rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
 
-# Copy built artifacts: gems, application
+# 成果物コピー
 COPY --from=build /usr/local/bundle /usr/local/bundle
 COPY --from=build /rails /rails
 
-# Run and own only the runtime files as a non-root user for security
+# 非 root 実行
 RUN useradd rails --create-home --shell /bin/bash && \
+    mkdir -p db log storage tmp && \
     chown -R rails:rails db log storage tmp
 USER rails:rails
 
-# Entrypoint prepares the database.
+# DB 準備の entrypoint（あなたのリポに合わせて）
 ENTRYPOINT ["/rails/bin/docker-entrypoint"]
 
-# Start the server by default, this can be overwritten at runtime
 EXPOSE 3000
+# Puma でも rails server でもOK（Puma同梱）。puma 設定があるなら置換可。
 CMD ["./bin/rails", "server"]

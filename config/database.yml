@@ -1,21 +1,26 @@
 default: &default
   adapter: postgresql
-  encoding: unicode
-  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
-  username: postgres
-  password: postgres123
-  host: localhost
+  encoding: utf8
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS", 5) %>
 
 development:
   <<: *default
   database: furima_46195_development
+  host: localhost
+  username: postgres
+  password: postgres123
+  # ↑これはローカル開発用なのでそのままでもOK（必要なら自分の環境に合わせる）
 
 test:
   <<: *default
   database: furima_46195_test
+  host: localhost
+  username: postgres
+  password: postgres123
 
 production:
-  <<: *default
-  database: furima_46195_production
-  username: furima_46195
-  password: <%= ENV["FURIMA_46195_DATABASE_PASSWORD"] %>
+  # ★本番は URL 一発指定にする（Render 推奨）
+  url: <%= ENV["DATABASE_URL"] %>
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS", 5) %>
+  sslmode: require
+  prepared_statements: false
