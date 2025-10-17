@@ -44,7 +44,7 @@ RUN set -eux; \
 # bootsnap とアセットを build 時にプリコンパイル
 RUN bundle exec bootsnap precompile app/ lib/ || true
 # credentials を参照させないためダミーキーで precompile（bin直叩きせず bundle exec で）
-RUN SECRET_KEY_BASE_DUMMY=1 bundle exec rails assets:precompile
+RUN SECRET_KEY_BASE_DUMMY=1 ruby bin/rails assets:precompile
 
 # ---------- Final stage ----------
 FROM base
