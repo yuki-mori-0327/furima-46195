@@ -33,3 +33,8 @@
 
 # Ignore master key for decrypting credentials and more.
 /config/master.key
+
+
+printf "\n# Ignore Windows ADS and reserved names\n*:[Zz]one.Identifier\nNUL\n" >> .gitignore
+git add .gitignore
+git commit -m "Ignore Windows ADS (:Zone.Identifier) and NUL"
