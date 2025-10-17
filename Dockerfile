@@ -43,8 +43,11 @@ RUN set -eux; \
 
 # bootsnap とアセットを build 時にプリコンパイル
 RUN bundle exec bootsnap precompile app/ lib/ || true
-# Precompiling assets for production without requiring secret RAILS_MASTER_KEY
-RUN SECRET_KEY_BASE_DUMMY=1 ruby bin/rails assets:precompile
+# DB には実際には接続しない。Rails に adapter(postgresql) を教えるためだけのダミーURL
+RUN SECRET_KEY_BASE_DUMMY=1 \
+    DATABASE_URL=postgresql://postgres:postgres@localhost:5432/dummy \
+    bundle exec rails assets:precompile
+
 
 # ---------- Final stage ----------
 FROM base
