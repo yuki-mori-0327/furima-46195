@@ -13,7 +13,7 @@ ENV RAILS_ENV=production \
 # ---------- Build stage ----------
 FROM base AS build
 
-# ネイティブ拡張＆PGのビルドに必要 / アセット用に Node.js 必須
+# ネイティブ拡張＆PGのビルドに必要 / アセット用に Node.js（importmapでも一部gemがnode検出する場合がある）
 RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y \
       build-essential git pkg-config \
@@ -24,34 +24,32 @@ RUN apt-get update -qq && \
 
 # 依存を先に入れてキャッシュを効かせる
 COPY Gemfile Gemfile.lock ./
-# ※ lock に Linux プラットフォームが無い場合は事前にローカルで
-#    `bundle lock --add-platform x86_64-linux` を実行しておく
+# ※ 必要なら事前に `bundle lock --add-platform x86_64-linux`
 RUN bundle install && \
     rm -rf ~/.bundle "$BUNDLE_PATH"/ruby/*/cache "$BUNDLE_PATH"/ruby/*/bundler/gems/*/.git && \
-    bundle exec bootsnap precompile --gemfile
+    bundle exec bootsnap precompile --gemfile || true
 
 # アプリ本体
 COPY . .
 
-# Windows 改行対策 & bin 実行権限
-# アプリ本体
-COPY . .
-
-# 改行(LF化)と実行権限付与を確実に
+# Windows 改行対策 & bin 実行権限を確実に付与
 RUN set -eux; \
   if [ -d bin ]; then \
     find bin -maxdepth 1 -type f -exec sed -i 's/\r$//' {} \; ; \
-    chmod -v 0755 bin/* || true; \
-  fi
+    chmod 0755 bin/* || true; \
+  fi; \
+  [ -f ./bin/docker-entrypoint ] && sed -i 's/\r$//' ./bin/docker-entrypoint || true; \
+  [ -f ./bin/docker-entrypoint ] && chmod 0755 ./bin/docker-entrypoint || true
 
 # bootsnap とアセットを build 時にプリコンパイル
 RUN bundle exec bootsnap precompile app/ lib/ || true
+# credentials を参照させないためダミーキーで precompile（bin直叩きせず bundle exec で）
 RUN SECRET_KEY_BASE_DUMMY=1 bundle exec rails assets:precompile
 
 # ---------- Final stage ----------
 FROM base
 
-# ランタイムに必要なライブラリ（pg ランタイム / Node は一応残す）
+# ランタイムに必要なライブラリ
 RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y \
       curl \
@@ -70,9 +68,9 @@ RUN useradd rails --create-home --shell /bin/bash && \
     chown -R rails:rails db log storage tmp
 USER rails:rails
 
-# DB 準備の entrypoint（あなたのリポに合わせて）
+# DB 準備の entrypoint（あなたのリポのスクリプト想定）
 ENTRYPOINT ["/rails/bin/docker-entrypoint"]
 
 EXPOSE 3000
-# Puma でも rails server でもOK（Puma同梱）。puma 設定があるなら置換可。
-CMD ["./bin/rails", "server"]
+# Puma設定があるなら差し替え可。ここでは rails server を 0.0.0.0 で起動
+CMD ["bundle", "exec", "rails", "server", "-b", "0.0.0.0", "-p", "3000"]
