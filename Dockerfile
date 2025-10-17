@@ -39,12 +39,13 @@ COPY . .
 
 # 改行(LF化)と実行権限付与を確実に
 RUN set -eux; \
-    find bin -type f -maxdepth 1 -exec sed -i 's/\r$//' {} \; || true; \
-    find bin -type f -maxdepth 1 -exec chmod +x {} \; || true
+  if [ -d bin ]; then \
+    find bin -maxdepth 1 -type f -exec sed -i 's/\r$//' {} \; ; \
+    chmod -v 0755 bin/* || true; \
+  fi
 
 # bootsnap とアセットを build 時にプリコンパイル
 RUN bundle exec bootsnap precompile app/ lib/ || true
-# credentials を参照しないようダミーキーで precompile
 RUN SECRET_KEY_BASE_DUMMY=1 bundle exec rails assets:precompile
 
 # ---------- Final stage ----------
