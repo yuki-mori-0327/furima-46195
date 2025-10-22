@@ -17,7 +17,7 @@ FROM base AS build
 RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y \
       build-essential git pkg-config \
-       libpq-dev nodejs \
+      libpq-dev nodejs \
       # mini_magick 用に imagemagick をインストール
       imagemagick && \
     rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
