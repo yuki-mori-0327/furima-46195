@@ -10,4 +10,8 @@ Rails.application.routes.draw do
   resources :items do
     resources :orders, only: [:index, :create]
   end
+
+  # ← ここから追加
+  get '/admin/storage_fix', to: 'admin#storage_fix'
+  # ← ここまで追加
 end
