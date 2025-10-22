@@ -32,22 +32,21 @@ RUN bundle install && \
 # アプリ本体
 COPY . .
 
-# Windows 改行対策 & bin 実行権限を確実に付与
+# Windows の CRLF→LF & bin を実行可能化
 RUN set -eux; \
   if [ -d bin ]; then \
     find bin -maxdepth 1 -type f -exec sed -i 's/\r$//' {} \; ; \
-    chmod 0755 bin/* || true; \
-  fi; \
-  [ -f ./bin/docker-entrypoint ] && sed -i 's/\r$//' ./bin/docker-entrypoint || true; \
-  [ -f ./bin/docker-entrypoint ] && chmod 0755 ./bin/docker-entrypoint || true
+    chmod 0755 bin/*; \
+  fi
 
-# bootsnap とアセットを build 時にプリコンパイル
+# bootsnap は任意
 RUN bundle exec bootsnap precompile app/ lib/ || true
-# DB には実際には接続しない。Rails に adapter(postgresql) を教えるためだけのダミーURL
-RUN SECRET_KEY_BASE_DUMMY=1 \
-    DATABASE_URL=postgresql://postgres:postgres@localhost:5432/dummy \
-    bundle exec rails assets:precompile
 
+# 本番アセットを master key なしでプリコンパイル（bin/rails を直接叩かない）
+ENV RAILS_ENV=production \
+    DATABASE_URL=postgresql://postgres:postgres123@localhost:5432/furima_46195_production?sslmode=disable
+
+RUN SECRET_KEY_BASE_DUMMY=1 bundle exec rails assets:precompile
 
 # ---------- Final stage ----------
 FROM base

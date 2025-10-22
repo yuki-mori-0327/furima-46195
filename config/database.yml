@@ -19,8 +19,4 @@ test:
   password: postgres123
 
 production:
-  # ★本番は URL 一発指定にする（Render 推奨）
   url: <%= ENV["DATABASE_URL"] %>
-  pool: <%= ENV.fetch("RAILS_MAX_THREADS", 5) %>
-  sslmode: require
-  prepared_statements: false
