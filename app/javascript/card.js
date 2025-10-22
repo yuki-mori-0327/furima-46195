@@ -1,29 +1,32 @@
-// app/javascript/card.js
-const pay = () => {
-  const publicKey = gon.PAYJP_PUBLIC_KEY || "<%= ENV['PAYJP_PUBLIC_KEY'] %>"; // gonを使う場合もOK
-  Payjp.setPublicKey(publicKey);
-
+const setupPay = () => {
   const form = document.getElementById("charge-form");
-  if (!form) return; // フォームが無いページでは何もしない
+  if (!form || !window.Payjp) return;
+
+  // <meta> から公開鍵を取得
+  const meta = document.querySelector('meta[name="payjp-public-key"]');
+  if (!meta || !meta.content) return;
+
+  Payjp.setPublicKey(meta.content);
 
   form.addEventListener("submit", (e) => {
     e.preventDefault();
-    const formData = new FormData(form);
 
+    const fd = new FormData(form);
     const card = {
-      number: formData.get("order_form[number]"),
-      exp_month: formData.get("order_form[exp_month]"),
-      exp_year: `20${formData.get("order_form[exp_year]")}`,
-      cvc: formData.get("order_form[cvc]"),
+      number:    fd.get("order_form[number]"),
+      exp_month: fd.get("order_form[exp_month]"),
+      exp_year:  `20${fd.get("order_form[exp_year]")}`,
+      cvc:       fd.get("order_form[cvc]"),
     };
 
     Payjp.createToken(card, (status, response) => {
       if (status === 200) {
-        const token = response.id;
-        const tokenObj = `<input value=${token} name='token' type="hidden">`;
-        form.insertAdjacentHTML("beforeend", tokenObj);
+        form.insertAdjacentHTML(
+          "beforeend",
+          `<input type="hidden" name="token" value="${response.id}">`
+        );
       }
-
+      // name 属性を外す（カード情報は送らない）
       document.getElementById("card-number")?.removeAttribute("name");
       document.getElementById("card-exp-month")?.removeAttribute("name");
       document.getElementById("card-exp-year")?.removeAttribute("name");
@@ -34,4 +37,5 @@ const pay = () => {
   });
 };
 
-document.addEventListener("turbo:load", pay);
+document.addEventListener("turbo:load", setupPay);
+document.addEventListener("turbo:render", setupPay);
