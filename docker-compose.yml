@@ -1,0 +1,37 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:14
+    container_name: furima-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+      POSTGRES_DB: furima_46195_production
+    ports:
+      - "5432:5432"
+    networks:
+      - furima-net
+
+  app:
+    build: .
+    container_name: furima-app
+    depends_on:
+      - db
+    environment:
+      RAILS_ENV: production
+      DATABASE_URL: postgresql://postgres:postgres123@furima-db:5432/furima_46195_production?sslmode=disable
+      SECRET_KEY_BASE: dummy
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./cert:/cert:ro
+    command: >
+      bash -lc "bundle exec puma -C config/puma.rb
+      -b 'ssl://0.0.0.0:3000?key=/cert/localhost+2-key.pem&cert=/cert/localhost+2.pem'"
+    networks:
+      - furima-net
+
+networks:
+  furima-net:
+    external: true
