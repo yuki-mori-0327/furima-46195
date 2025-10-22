@@ -30,7 +30,7 @@ Rails.application.configure do
   # プリコンパイルするので、動的なコンパイルは無効化（パフォーマンス向上）
   config.assets.compile = false
 
- config.assets.digest = true
+  config.assets.digest = true
 
   # Enable serving of images, stylesheets, and JavaScripts from an asset server.
   # config.asset_host = "http://assets.example.com"
