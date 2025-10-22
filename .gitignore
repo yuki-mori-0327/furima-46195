@@ -36,4 +36,10 @@
 
 .Ds_Store
 
-*:Zone.Identifier
+*Zone.Identifier
+
+# 開発用SSL証明書
+config/ssl/*
+
+# たまに紛れ込むNULファイルを無視
+NUL
