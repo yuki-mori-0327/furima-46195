@@ -72,3 +72,8 @@ gem 'devise'
 gem "sassc-rails", "~> 2.1"
 
 gem 'active_hash'
+
+gem 'mini_magick'
+gem 'image_processing', '~> 1.2'
+
+gem "aws-sdk-s3", "~> 1.145" 
