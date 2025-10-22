@@ -1,8 +1,11 @@
-#!/bin/bash -e
+#!/usr/bin/env bash
+set -euo pipefail
 
-# If running the rails server then create or migrate existing database
-if [ "${1}" == "./bin/rails" ] && [ "${2}" == "server" ]; then
+# rails server で起動する時だけ DB を準備
+if printf '%s ' "$@" | grep -q 'rails' && printf '%s ' "$@" | grep -q 'server'; then
+  # RAILS_ENV は Dockerfile の ENV か実行時の環境変数に依存
+  echo "[entrypoint] running: rails db:prepare (RAILS_ENV=${RAILS_ENV:-})"
   ./bin/rails db:prepare
 fi
 
-exec "${@}"
+exec "$@"
