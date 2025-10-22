@@ -1,6 +1,6 @@
-import { Application } from "@hotwired/stimulus"
-import { definitionsFromContext } from "@hotwired/stimulus-loading"
+// app/javascript/controllers/index.js
+import { application } from "./application"
+import { eagerLoadControllersFrom } from "@hotwired/stimulus-loading"
 
-window.Stimulus = Application.start()
-const context = require.context(".", true, /\.js$/)
-Stimulus.load(definitionsFromContext(context))
+// controllers フォルダ配下の *_controller.js を自動登録
+eagerLoadControllersFrom("controllers", application)
