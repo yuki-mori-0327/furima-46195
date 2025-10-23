@@ -1,6 +1,5 @@
-import { Application } from "@hotwired/stimulus"
-import { definitionsFromContext } from "@hotwired/stimulus-loading"
+// app/javascript/controllers/index.js
+import { application } from "./application"
+import CreditCardController from "./credit_card_controller"
 
-window.Stimulus = Application.start()
-const context = require.context("controllers", true, /\.js$/)
-Stimulus.load(definitionsFromContext(context))
+application.register("credit-card", CreditCardController)

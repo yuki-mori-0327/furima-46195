@@ -226,3 +226,29 @@
   .buy-item-info { height: auto; padding: 12px 0; }
   .buy-item-img { width: 45vw; height: auto; }
 }
+
+/* ===== クレカフォーム専用の見た目をスコープする ===== */
+.credit-card-form .form-text-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.credit-card-form .input-default.is-invalid,
+.credit-card-form .input-expiration-date.is-invalid {
+  color: #e11d48;
+  border-color: #e11d48;
+}
+
+.credit-card-form .hint {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+  color: #666;
+}
+.credit-card-form .hint.error { color: #e11d48; }
+
+#card-expiry {
+  text-align: center;
+  letter-spacing: 1px;
+}
