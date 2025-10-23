@@ -33,11 +33,17 @@ class ItemsController < ApplicationController
     end
   end
 
-  def show; end
+  def show; 
+  end
 
   def destroy
-    @item.destroy
-    redirect_to root_path, notice: "商品を削除しました"
+    # ログインしているユーザーと同一であればデータを削除する
+    if @item.user_id == current_user.id
+      @item.destroy
+      redirect_to root_path
+    else
+      redirect_to root_path
+    end
   end
 
   private
