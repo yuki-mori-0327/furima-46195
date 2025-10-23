@@ -60,10 +60,14 @@ class OrderForm
     self.prefecture_id = prefecture_id.to_i if prefecture_id.present?
   end
 
-  def to_hankaku(str)
-    return '' if str.nil?
-    # 全角英数記号→半角
-    str.tr('０-９ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ－ー―‐',
-           '0-9abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ----')
+ def to_hankaku(str)
+  return str if str.blank?
+
+  # 全角→半角（互換）に正規化
+  s = str.to_s.unicode_normalize(:nfkc)
+
+  # いろいろなハイフン/長音/マイナス記号を ASCII ハイフンに寄せる
+  # ‐-‒–—―− ー ｰ など
+  s.gsub(/[‐-‒–—―−ーｰ]/, '-')
   end
 end
