@@ -7,8 +7,8 @@
       <%= @item.name %>
     </h2>
     <div class='item-img-content'>
-     <%= image_tag url_for(item.image), class: "item-img" if item.image.attached? %>
-  
+      <%= image_tag url_for(@item.image), class: "item-img" if @item.image.attached? %>
+
       <%# 商品が売れている場合は、sold outを表示 %>
       <% if @item.order != nil %>
       <div class='sold-out'>
