@@ -1,40 +1,53 @@
+// card.js（v2対応版）
 const setupPay = () => {
   const form = document.getElementById("charge-form");
   if (!form || !window.Payjp) return;
+  if (form.dataset.payjpBound === "true") return;
+  form.dataset.payjpBound = "true";
 
-  // <meta> から公開鍵を取得
-  const meta = document.querySelector('meta[name="payjp-public-key"]');
-  if (!meta || !meta.content) return;
+  // v2 は Payjp() で初期化（<script data-key="..."> を付けておく）
+  const payjp = Payjp();
 
-  Payjp.setPublicKey(meta.content);
-
-  form.addEventListener("submit", (e) => {
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
     const fd = new FormData(form);
     const card = {
       number:    fd.get("order_form[number]"),
-      exp_month: fd.get("order_form[exp_month]"),
-      exp_year:  `20${fd.get("order_form[exp_year]")}`,
       cvc:       fd.get("order_form[cvc]"),
+      exp_month: fd.get("order_form[exp_month]"),
+      exp_year:  String(fd.get("order_form[exp_year]")).length === 2
+                  ? `20${fd.get("order_form[exp_year]")}`
+                  : fd.get("order_form[exp_year]"),
     };
 
-    Payjp.createToken(card, (status, response) => {
-      if (status === 200) {
-        form.insertAdjacentHTML(
-          "beforeend",
-          `<input type="hidden" name="token" value="${response.id}">`
-        );
+    if (!card.number || !card.cvc || !card.exp_month || !card.exp_year) {
+      alert("カード情報を入力してください");
+      return;
+    }
+
+    try {
+      const result = await payjp.createToken(card); // v2はPromise & result.error
+      if (result.error) {
+        alert(result.error.message || "カードのトークン化に失敗しました。入力内容をご確認ください。");
+        return;
       }
-      // name 属性を外す（カード情報は送らない）
-      document.getElementById("card-number")?.removeAttribute("name");
-      document.getElementById("card-exp-month")?.removeAttribute("name");
-      document.getElementById("card-exp-year")?.removeAttribute("name");
-      document.getElementById("card-cvc")?.removeAttribute("name");
+
+      form.insertAdjacentHTML(
+        "beforeend",
+        `<input type="hidden" name="token" value="${result.id}">`
+      );
+
+      ["card-number","card-exp-month","card-exp-year","card-cvc"].forEach(id=>{
+        document.getElementById(id)?.removeAttribute("name");
+      });
 
       form.submit();
-    });
-  });
+    } catch (err) {
+      console.error(err);
+      alert("通信に失敗しました。時間をおいて再度お試しください。");
+    }
+  }, { once: true });
 };
 
 document.addEventListener("turbo:load", setupPay);
