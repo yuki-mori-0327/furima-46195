@@ -6,6 +6,21 @@ const setupPay = () => {
 
   const payjp = Payjp();
 
+   const expiryInput = document.getElementById("card-expiry");
+  if (expiryInput) {
+    expiryInput.addEventListener("input", (e) => {
+      let v = e.target.value.replace(/[^\d]/g, ""); // 数字のみ
+      if (v.length === 1 && Number(v) > 1) {
+        v = "0" + v; // 例: 2 → 02
+      }
+      if (v.length > 2) {
+        v = v.slice(0, 2) + " / " + v.slice(2, 4); // 例: 0227 → 02 / 27
+      }
+      e.target.value = v.slice(0, 7); // 最大 "MM / YY"
+    });
+  }
+
+
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
@@ -71,19 +86,6 @@ const setupPay = () => {
   });
 };
 
-document.addEventListener("input", (e) => {
-  const target = e.target;
-  if (target.id !== "card-expiry") return;
-
-  let v = target.value.replace(/[^\d]/g, ""); // 数字のみ
-  if (v.length === 1 && Number(v) > 1) {
-    v = "0" + v; // 例: 2 → 02
-  }
-  if (v.length > 2) {
-    v = v.slice(0, 2) + " / " + v.slice(2, 4); // 例: 0227 → 02 / 27
-  }
-  target.value = v.slice(0, 7); // 最大 "MM / YY" 表記
-});
 
 
 document.addEventListener("turbo:load", setupPay);
