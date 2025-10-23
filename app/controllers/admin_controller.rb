@@ -1,14 +1,24 @@
 class AdminController < ApplicationController
-  # セキュリティ上、誰でも叩けないように念のため環境変数キーをチェック
+  before_action :authenticate_user!
+
   def storage_fix
-    key = params[:key]
-    return render plain: "unauthorized" unless key == ENV["STORAGE_FIX_KEY"]
+    @counts = ActiveStorage::Blob.group(:service_name).count
+    render plain: @counts.inspect  # とりあえず動作確認用
+  end
 
-    before = ActiveStorage::Blob.group(:service_name).count
+  def storage_copy
     system("bin/rails active_storage:copy --source local --destination amazon")
-    ActiveStorage::Blob.where(service_name: "local").in_batches.update_all(service_name: "amazon")
-    after = ActiveStorage::Blob.group(:service_name).count
+    redirect_to admin_storage_fix_path, notice: "コピーを実行しました"
+  end
 
-    render plain: "✅ Updated! before: #{before.inspect} / after: #{after.inspect}"
+  def storage_switch
+    ActiveStorage::Blob.where(service_name: "local").in_batches.update_all(service_name: "amazon")
+    redirect_to admin_storage_fix_path, notice: "service_name を local→amazon に更新しました"
+  end
+
+  private
+
+  def ensure_admin!
+    head :forbidden unless current_user&.respond_to?(:admin?) && current_user.admin?
   end
 end
