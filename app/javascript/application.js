@@ -5,3 +5,5 @@ import "card"
 
 import * as ActiveStorage from "@rails/activestorage"
 ActiveStorage.start()
+
+import "price_calc"

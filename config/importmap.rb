@@ -13,3 +13,4 @@ pin "@rails/activestorage", to: "activestorage.esm.js"
 
 pin "item_price", to: "item_price.js"
 pin "card",       to: "card.js"
+pin "price_calc", to: "price_calc.js"
