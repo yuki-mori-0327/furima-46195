@@ -1,12 +1,12 @@
+# app/controllers/items_controller.rb
 class ItemsController < ApplicationController
-  # ログインしていないユーザーはログインページに促す
   before_action :authenticate_user!, except: [:index, :show]
-
-  # 重複処理をまとめる
   before_action :set_item, only: [:show, :edit, :update, :destroy]
+  before_action :authorize_owner!, only: [:edit, :update, :destroy]
+  before_action :forbid_when_sold!, only: [:edit, :update, :destroy]
 
   def index
-    @items = Item.includes(:user).order('created_at DESC')
+    @items = Item.includes(:user).order(created_at: :desc)
   end
 
   def new
@@ -14,57 +14,51 @@ class ItemsController < ApplicationController
   end
 
   def create
-    @item = Item.new(item_params)
+    @item = current_user.items.build(item_params)
     if @item.save
-      redirect_to root_path
+      redirect_to @item, notice: "商品を出品しました"
     else
-      render :new
+      render :new, status: :unprocessable_entity
     end
   end
 
   def edit
-    # ログインしているユーザーと同一であればeditファイルが読み込まれる
-    if @item.user_id == current_user.id && @item.order.nil?
-    else
-      redirect_to root_path
-    end
   end
 
   def update
-    @item.update(item_params)
-    # バリデーションがOKであれば詳細画面へ
-    if @item.valid?
-      redirect_to item_path(item_params)
+    if @item.update(item_params)
+      redirect_to @item, notice: "商品を更新しました"
     else
-      # NGであれば、エラー内容とデータを保持したままeditファイルを読み込み、エラーメッセージを表示させる
-      render 'edit'
+      render :edit, status: :unprocessable_entity
     end
   end
 
-  def show
-  end
+  def show; end
 
   def destroy
-    # ログインしているユーザーと同一であればデータを削除する
-    if @item.user_id == current_user.id
-      @item.destroy
-      redirect_to root_path
-    else
-      redirect_to root_path
-    end
+    @item.destroy
+    redirect_to root_path, notice: "商品を削除しました"
   end
 
   private
 
-   def item_params
-   params.require(:item).permit(
-    :name, :price, :explanation, :image,
-    :category_id, :condition_id, :shipping_fee_status_id,
-    :prefecture_id, :scheduled_delivery_id
-   ).merge(user_id: current_user.id)
-   end
-
   def set_item
     @item = Item.find(params[:id])
+  end
+
+  def authorize_owner!
+    redirect_to root_path, alert: "権限がありません" unless @item.user_id == current_user.id
+  end
+
+  def forbid_when_sold!
+    redirect_to root_path, alert: "売却済み商品のため編集できません" if @item.respond_to?(:order) && @item.order.present?
+  end
+
+  def item_params
+    params.require(:item).permit(
+      :image, :name, :explanation, :price,
+      :category_id, :condition_id,
+      :shipping_fee_status_id, :prefecture_id, :scheduled_delivery_id
+    )
   end
 end
