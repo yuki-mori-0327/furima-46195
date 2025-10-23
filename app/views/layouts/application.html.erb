@@ -7,7 +7,7 @@
   <%= csp_meta_tag %>
 
 <meta name="payjp-public-key" content="<%= ENV['PAYJP_PUBLIC_KEY'] %>">
-<script src="https://js.pay.jp/v2/pay.js" defer data-key="<%= ENV['PAYJP_PUBLIC_KEY'] %>"></script>
+<script src="https://js.pay.jp/v2/pay.js" defer></script> 
 <%= javascript_importmap_tags %>
 <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
   
