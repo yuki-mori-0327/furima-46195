@@ -25,6 +25,7 @@ export default class extends Controller {
   static targets = ["number", "exp", "expHint", "expMonth", "expYear", "cvc"];
 
   connect() {
+      console.log("credit-card connected")
     // カード番号：4桁ごとスペース
     if (this.hasNumberTarget) {
       this.numberTarget.addEventListener("input", () => {

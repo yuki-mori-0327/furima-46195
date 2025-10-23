@@ -2,17 +2,16 @@
 <html>
 
 <head>
-  <title>Furima</title>
+  <title><%= content_for?(:title) ? yield(:title) : "Furima46195" %></title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <%= csrf_meta_tags %>
   <%= csp_meta_tag %>
 
-<meta name="payjp-public-key" content="<%= ENV['PAYJP_PUBLIC_KEY'] %>">
-<script src="https://js.pay.jp/v2/pay.js" defer></script> 
-<%= javascript_importmap_tags %>
-<%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
-  
-
+  <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+  <!-- ✅ Importmap だけでJSを読む。controllersのincludeタグは不要 -->
+  <%= javascript_importmap_tags %>
 </head>
+
 
 <body>
   <%= yield %>
