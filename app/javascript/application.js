@@ -1,5 +1,5 @@
 import "@hotwired/turbo-rails"
-import "card"
+import "./controllers"
 
 import * as ActiveStorage from "@rails/activestorage"
 ActiveStorage.start()

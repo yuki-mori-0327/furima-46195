@@ -36,46 +36,68 @@
     <%= render 'shared/error_messages', model: f.object %>
 
     <%# カード情報の入力 %>
-    <div class='credit-card-form'>
-      <h1 class='info-input-haedline'>
-        クレジットカード情報入力
-      </h1>
-      <div class="form-group">
-        <div class='form-text-wrap'>
-          <label class="form-text">カード情報</label>
-          <span class="indispensable">必須</span>
-        </div>
-        <%= f.text_field 'number', class:"input-default", id:"card-number", placeholder:"カード番号(半角英数字)", maxlength:"16" %>
-        <div class='available-card'>
-          <%= image_tag 'card-visa.gif', class: 'card-logo'%>
-          <%= image_tag 'card-mastercard.gif', class: 'card-logo'%>
-          <%= image_tag 'card-jcb.gif', class: 'card-logo'%>
-          <%= image_tag 'card-amex.gif', class: 'card-logo'%>
-        </div>
-      </div>
-      <div class="form-group">
-  <div class='form-text-wrap'>
-    <label class="form-text">有効期限</label>
-    <span class="indispensable">必須</span>
+    <div class='credit-card-form' data-controller="credit-card">
+  <h1 class='info-input-haedline'>
+    クレジットカード情報入力
+  </h1>
+
+  <!-- カード番号 -->
+  <div class="form-group">
+    <div class='form-text-wrap'>
+      <label class="form-text">カード情報</label>
+      <span class="indispensable">必須</span>
+    </div>
+    <%= f.text_field 'number',
+          class:"input-default",
+          id:"card-number",
+          inputmode:"numeric",
+          autocomplete:"cc-number",
+          placeholder:"1111 2222 3333 4444",
+          maxlength:"23",
+          data: { credit_card_target: "number" } %>
+    <div class='available-card'>
+      <%= image_tag 'card-visa.gif', class: 'card-logo'%>
+      <%= image_tag 'card-mastercard.gif', class: 'card-logo'%>
+      <%= image_tag 'card-jcb.gif', class: 'card-logo'%>
+      <%= image_tag 'card-amex.gif', class: 'card-logo'%>
+    </div>
   </div>
-  <input
-       id="card-expiry"
+
+  <!-- 有効期限 -->
+  <div class="form-group">
+    <div class='form-text-wrap'>
+      <label class="form-text">有効期限</label>
+      <span class="indispensable">必須</span>
+    </div>
+    <input
+      id="card-expiry"
       name="order_form[expiry]"
       type="text"
       class="input-default"
-      placeholder="月 / 年"
+      placeholder="MM/YY"
       inputmode="numeric"
       autocomplete="cc-exp"
-      maxlength="7">
+      maxlength="5"
+      data-credit-card-target="exp">
+    <small class="hint" data-credit-card-target="expHint"></small>
   </div>
-      <div class="form-group">
-        <div class='form-text-wrap'>
-          <label class="form-text">セキュリティコード</label>
-          <span class="indispensable">必須</span>
-        </div>
-        <%= f.text_field "cvc",class:"input-default", id:"card-cvc", placeholder:"カード背面4桁もしくは3桁の番号", maxlength:"4" %>
-      </div>
+
+  <!-- セキュリティコード -->
+  <div class="form-group">
+    <div class='form-text-wrap'>
+      <label class="form-text">セキュリティコード</label>
+      <span class="indispensable">必須</span>
     </div>
+    <%= f.text_field 'cvc',
+          class:"input-default",
+          id:"card-cvc",
+          inputmode:"numeric",
+          autocomplete:"cc-csc",
+          placeholder:"CVC",
+          maxlength:"4",
+          data: { credit_card_target: "cvc" } %>
+  </div>
+</div>
     <%# /カード情報の入力 %>
     
     <%# 配送先の入力 %>

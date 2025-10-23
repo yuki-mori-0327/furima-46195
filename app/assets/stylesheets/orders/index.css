@@ -155,3 +155,74 @@
   font-size: 14px;
   cursor: pointer;
 }
+
+/* ===== クレカ入力の見た目 強化分（追記） ===== */
+
+/* 共通入力（カード番号・有効期限・CVC） */
+.input-default {
+  width: 100%;
+  height: 48px;
+  border-radius: 4px;
+  border: 1.5px solid #ccc;
+  background: #fff;
+  font-size: 16px;
+  padding: 0 12px;
+  transition: border-color .15s, box-shadow .15s, color .15s;
+}
+
+.input-default:focus {
+  outline: none;
+  border-color: #3b82f6;                /* ブルーのフォーカス */
+  box-shadow: 0 0 0 3px rgba(59,130,246,.15);
+}
+
+/* 期限切れやエラー時（Stimulusが .is-invalid を付与） */
+.input-default.is-invalid,
+.input-expiration-date.is-invalid {
+  color: #e11d48;                        /* 文字も赤に */
+  border-color: #e11d48;                 /* 枠線も赤に */
+}
+
+/* 有効期限ヒント */
+.hint {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+  color: #666;
+}
+.hint.error { color: #e11d48; }
+
+/* MM/YY 単一フィールド用の見た目（中央寄せなど） */
+#card-expiry {
+  text-align: center;
+  letter-spacing: 1px;                   /* “MM/YY” を少し見やすく */
+}
+
+/* （月/年 分割レイアウトを使う場合の微調整。使っていなければ無視OK） */
+.input-expiration-date-wrap { gap: 6px; }
+
+/* ちょっとしたフォーム余白 */
+.form-group { margin-top: 14px; }
+.form-text-wrap { display: flex; align-items: center; gap: 8px; }
+.indispensable {
+  background: #ea352d; color: #fff; font-size: 12px;
+  border-radius: 2px; padding: 2px 6px;
+}
+
+/* ===== レイアウトの細かな改善（任意） ===== */
+
+/* 100vw はスクロールバー分で横スクが出やすい → 100% 推奨 */
+.transaction-contents { width: 100%; }
+
+/* メイン幅の上限を決めると大画面でも読みやすい */
+.transaction-main {
+  max-width: 960px;                      /* 画面が広い時の上限 */
+  margin: 0 auto;                        /* 中央寄せ（保険） */
+}
+
+/* スマホで少し詰める */
+@media (max-width: 480px) {
+  .transaction-main { width: 100%; padding: 6vh 5vw; min-width: 0; }
+  .buy-item-info { height: auto; padding: 12px 0; }
+  .buy-item-img { width: 45vw; height: auto; }
+}
