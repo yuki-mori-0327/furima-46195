@@ -21,7 +21,7 @@
         <%= @item.price %>円
       </span>
       <span class="item-postage">
-        <%= @item.shipping_cost.name %>
+        <%= @item.shipping_fee_status.name %>
       </span>
     </div>
 
@@ -42,36 +42,38 @@
   <% end %>
 
     <div class="item-explain-box">
-      <span><%= @item.description %></span>
+      <span><%= @item.explanation %></span>
     </div>
     <table class="detail-table">
-      <tbody>
-        <tr>
-          <th class="detail-item">出品者</th>
-          <td class="detail-value"><%= @item.user.nickname %></td>
-        </tr>
-        <tr>
-          <th class="detail-item">カテゴリー</th>
-          <td class="detail-value"><%= @item.category.name %></td>
-        </tr>
-        <tr>
-          <th class="detail-item">商品の状態</th>
-          <td class="detail-value"><%= @item.item_status.name %></td>
-        </tr>
-        <tr>
-          <th class="detail-item">配送料の負担</th>
-          <td class="detail-value"><%= @item.shipping_cost.name %></td>
-        </tr>
-        <tr>
-          <th class="detail-item">発送元の地域</th>
-          <td class="detail-value"><%= @item.prefecture.name %></td>
-        </tr>
-        <tr>
-          <th class="detail-item">発送日の目安</th>
-          <td class="detail-value"><%= @item.shipping_date.name%></td>
-        </tr>
-      </tbody>
-    </table>
+  <tbody>
+    <tr>
+      <th class="detail-item">出品者</th>
+      <td class="detail-value"><%= @item.user.nickname %></td>
+    </tr>
+    <tr>
+      <th class="detail-item">カテゴリー</th>
+      <td class="detail-value"><%= @item.category.name %></td>
+    </tr>
+    <tr>
+      <th class="detail-item">商品の状態</th>
+      <td class="detail-value"><%= @item.condition.name %></td> <   
+     </tr>
+    <tr>
+      <th class="detail-item">配送料の負担</th>
+      <td class="detail-value"><%= @item.shipping_fee_status.name %></td> 
+    </tr>
+    <tr>
+      <th class="detail-item">発送元の地域</th>
+      <td class="detail-value"><%= @item.prefecture.name %></td>
+    </tr>
+    <tr>
+      <th class="detail-item">発送日の目安</th>
+      <td class="detail-value"><%= @item.scheduled_delivery.name %></td> 
+    </tr>
+  </tbody>
+</table>
+
+   
     <div class="option">
       <div class="favorite-btn">
         <%= image_tag "star.png" ,class:"favorite-star-icon" ,width:"20",height:"20"%>
