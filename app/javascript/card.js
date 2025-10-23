@@ -1,44 +1,65 @@
-// card.js（v2対応版）
 const setupPay = () => {
   const form = document.getElementById("charge-form");
   if (!form || !window.Payjp) return;
   if (form.dataset.payjpBound === "true") return;
   form.dataset.payjpBound = "true";
 
-  // v2 は Payjp() で初期化（<script data-key="..."> を付けておく）
   const payjp = Payjp();
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
     const fd = new FormData(form);
+
+    // ---- 有効期限の解析（例: "03 / 27", "0327", "03/2027" などに対応）----
+    const rawExpiry = (fd.get("order_form[expiry]") || "").toString();
+    const normalized = rawExpiry.replace(/[^\d]/g, "").slice(0, 6);
+
+    let expMonth = "";
+    let expYear = "";
+
+    if (normalized.length >= 4) {
+      expMonth = normalized.slice(0, 2);
+      expYear = normalized.slice(2);
+      if (expYear.length === 4) expYear = expYear.slice(2); // 4桁→下2桁
+    }
+
+    // ---- カード情報の組み立て ----
     const card = {
-      number:    fd.get("order_form[number]"),
-      cvc:       fd.get("order_form[cvc]"),
-      exp_month: fd.get("order_form[exp_month]"),
-      exp_year:  String(fd.get("order_form[exp_year]")).length === 2
-                  ? `20${fd.get("order_form[exp_year]")}`
-                  : fd.get("order_form[exp_year]"),
+      number: fd.get("order_form[number]"),
+      cvc: fd.get("order_form[cvc]"),
+      exp_month: expMonth,
+      exp_year: expYear.length === 2 ? `20${expYear}` : expYear,
     };
 
-    if (!card.number || !card.cvc || !card.exp_month || !card.exp_year) {
-      alert("カード情報を入力してください");
+    // ---- バリデーション ----
+    const monthOk =
+      /^\d{2}$/.test(expMonth) && Number(expMonth) >= 1 && Number(expMonth) <= 12;
+    const yearOk = /^\d{2}$/.test(expYear);
+
+    if (!card.number || !card.cvc || !monthOk || !yearOk) {
+      alert("カード情報（番号・有効期限・CVC）を正しく入力してください");
       return;
     }
 
     try {
-      const result = await payjp.createToken(card); // v2はPromise & result.error
+      const result = await payjp.createToken(card);
       if (result.error) {
-        alert(result.error.message || "カードのトークン化に失敗しました。入力内容をご確認ください。");
+        alert(
+          result.error.message ||
+            "カードのトークン化に失敗しました。入力内容をご確認ください。"
+        );
         return;
       }
 
+      // ---- トークンをフォームに追加 ----
       form.insertAdjacentHTML(
         "beforeend",
         `<input type="hidden" name="token" value="${result.id}">`
       );
 
-      ["card-number","card-exp-month","card-exp-year","card-cvc"].forEach(id=>{
+      // ---- name属性を削除（カード情報をサーバーへ送らない）----
+      ["card-number", "card-expiry", "card-cvc"].forEach((id) => {
         document.getElementById(id)?.removeAttribute("name");
       });
 
@@ -47,7 +68,7 @@ const setupPay = () => {
       console.error(err);
       alert("通信に失敗しました。時間をおいて再度お試しください。");
     }
-  }, { once: true });
+  });
 };
 
 document.addEventListener("turbo:load", setupPay);

@@ -54,17 +54,21 @@
         </div>
       </div>
       <div class="form-group">
-        <div class='form-text-wrap'>
-          <label class="form-text">有効期限</label>
-          <span class="indispensable">必須</span>
-        </div>
-        <div class='input-expiration-date-wrap'>
-          <%= f.text_area 'exp_month', class:"input-expiration-date", id:"card-exp-month", placeholder:"例)3", maxlength:"2" %>
-          <p>月 20</p>
-          <%= f.text_area 'exp_year', class:"input-expiration-date", id:"card-exp-year", placeholder:"例)23", maxlength:"2" %>
-          <p>年</p>
-        </div>
-      </div>
+  <div class='form-text-wrap'>
+    <label class="form-text">有効期限</label>
+    <span class="indispensable">必須</span>
+  </div>
+  <input
+       id="card-expiry"
+      name="order_form[expiry]"
+      type="text"
+      class="input-default"
+      placeholder="月 / 年"
+      inputmode="numeric"
+      autocomplete="cc-exp"
+      maxlength="7"  <!-- 例: 03 / 27 -->
+     >
+  </div>
       <div class="form-group">
         <div class='form-text-wrap'>
           <label class="form-text">セキュリティコード</label>
