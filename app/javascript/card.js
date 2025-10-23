@@ -43,10 +43,10 @@ const setupPay = () => {
     }
 
     const card = {
-      number: fd.get("order_form[number]"),
-      cvc:    fd.get("order_form[cvc]"),
-      exp_month: mm,
-      exp_year:  yy.length === 2 ? `20${yy}` : yy,
+      number: String(fd.get("order_form[number]") || "").replace(/\s+/g, ""),
+      cvc:    String(fd.get("order_form[cvc]") || ""),
+      exp_month: Number(mm),                // ← 数値
+      exp_year:  Number(`20${yy}`),         // ← 4桁数値 (例: 2027)
     };
 
     const monthOk = /^\d{2}$/.test(mm) && +mm >= 1 && +mm <= 12;
@@ -57,7 +57,7 @@ const setupPay = () => {
     }
 
     try {
-      const result = await payjp.createToken(card);
+      const result = await payjp.createToken('card', card);
       if (result.error) {
         alert(result.error.message || "カードのトークン化に失敗しました。");
         return;
