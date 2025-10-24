@@ -28,11 +28,20 @@ export default class extends Controller {
       console.log("credit-card connected")
     // カード番号：4桁ごとスペース
     if (this.hasNumberTarget) {
-      this.numberTarget.addEventListener("input", () => {
-        const digits = this.numberTarget.value.replace(/\D/g, "").slice(0, 19); // 19桁まで（AMEX等考慮）
-        this.numberTarget.value = digits.replace(/(\d{4})(?=\d)/g, "$1 ").trim();
-      });
-    }
+  this.numberTarget.addEventListener("input", () => {
+    // 数字だけ取り出して最大19桁（AMEX等も許容）
+    const digitsOnly = this.numberTarget.value.replace(/\D/g, "").slice(0, 19);
+
+    // 4桁ごとにスペース整形
+    this.numberTarget.value = digitsOnly.replace(/(\d{4})(?=\d)/g, "$1 ").trim();
+
+    // ★ ここが追加：16桁を超えたら赤（.is-invalid を付ける）
+    const len = digitsOnly.length;
+    const over = len > 16;
+    this.numberTarget.classList.toggle("is-invalid", over);
+  });
+}
+
 
     // CVC：数字のみ（最大4桁）
     if (this.hasCvcTarget) {
