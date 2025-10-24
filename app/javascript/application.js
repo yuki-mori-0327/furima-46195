@@ -3,7 +3,7 @@ import "@hotwired/turbo-rails"
 import * as ActiveStorage from "@rails/activestorage"
 ActiveStorage.start()
 
-import "./controllers"
+import "controllers"  
 
 function setupPriceCalc() {
   const input  = document.getElementById("item-price");

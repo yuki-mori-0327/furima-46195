@@ -1,5 +1,3 @@
-// app/javascript/controllers/index.js
-import { application } from "./application"
-import CreditCardController from "./credit_card_controller"
-
-application.register("credit-card", CreditCardController)
+import { application } from "controllers/application"
+import { eagerLoadControllersFrom } from "@hotwired/stimulus-loading"
+eagerLoadControllersFrom("controllers", application)
