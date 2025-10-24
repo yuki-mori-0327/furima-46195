@@ -232,7 +232,11 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-wrap: nowrap; 
 }
+
+.credit-card-form .form-text { white-space: nowrap; }        /* ラベルを折り返さない */
+.credit-card-form .indispensable { flex: 0 0 auto; }         /
 
 .credit-card-form .input-default.is-invalid,
 .credit-card-form .input-expiration-date.is-invalid {
