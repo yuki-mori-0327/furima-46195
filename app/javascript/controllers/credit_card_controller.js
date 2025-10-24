@@ -37,7 +37,7 @@ export default class extends Controller {
 
     // ★ ここが追加：16桁を超えたら赤（.is-invalid を付ける）
     const len = digitsOnly.length;
-    const over = len > 16;
+    const over = len >= 16;
     this.numberTarget.classList.toggle("is-invalid", over);
   });
 }
