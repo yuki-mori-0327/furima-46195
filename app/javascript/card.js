@@ -1,3 +1,7 @@
+// app/javascript/card.js
+
+// ✅ PAY.JP v2 を importmap 経由で読み込む
+import Payjp from "@payjp/payjs";
 
 // --- 有効期限入力のマスク（Payjpに依存しないで常に動く） ---
 const bindExpiryMask = () => {
@@ -22,12 +26,17 @@ const setupPay = () => {
   if (!form) return;
 
   const pubKey = document.querySelector('meta[name="payjp-public-key"]')?.content;
-  if (!window.Payjp || !pubKey) return;
+  if (!pubKey) {
+    console.error("payjp-public-key が <meta> に設定されていません");
+    return;
+  }
+
 
   if (form.dataset.payjpBound === "true") return;
   form.dataset.payjpBound = "true";
 
-  const payjp = Payjp(pubKey); // ← data-keyは<head>で付けないこと
+  // ✅ import した Payjp をそのまま呼ぶ
+  const payjp = Payjp(pubKey);
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -46,7 +55,7 @@ const setupPay = () => {
     }
 
     // ✅ ここを “文字列” に揃える（ゼロ埋め & 年は4桁）
-    const exp_month = (mm  || "").padStart(2, "0");       // "03"
+    const exp_month = (mm  || "").padStart(2, "0");        // "03"
     const exp_year  = `20${(yy2 || "").padStart(2, "0")}`; // "2027"
 
     const card = {
@@ -55,9 +64,10 @@ const setupPay = () => {
       exp_month,
       exp_year,
     };
-    
-     console.log("DEBUG pubKey:", pubKey);          // ← 追加
-     console.log("DEBUG card:", card);             // ← 追加
+
+    console.log("DEBUG pubKey:", pubKey);
+    console.log("DEBUG card:", card);
+
     // 簡易バリデーション
     const monthOk = /^\d{2}$/.test(exp_month) && +exp_month >= 1 && +exp_month <= 12;
     const yearOk  = /^\d{4}$/.test(exp_year)  && +exp_year  >= 2000 && +exp_year  <= 2099;
@@ -66,26 +76,27 @@ const setupPay = () => {
       return;
     }
 
-    // デバッグ：渡す実引数を確認
-    console.log('createToken args:', 'card', card);
+    console.log("createToken args:", "card", card);
 
     try {
-      // v2 正式シグネチャ
-      const result = await payjp.createToken('card', card);
-      console.log("DEBUG result:", result); 
+      // ✅ v2 のトークン化（生カードオブジェクト版）
+      const result = await payjp.createToken("card", card);
+      console.log("DEBUG result:", result);
 
       if (result?.error) {
         console.error(result.error);
         alert(result.error.message || "カードのトークン化に失敗しました。入力内容をご確認ください。");
         return;
       }
-      
-      form.insertAdjacentHTML(
-      "beforeend",
-  `    <input type="hidden" name="order_form[token]" value="${result.id}">`
-       );
 
-      ["card-number", "card-expiry", "card-cvc"].forEach(id => {
+      // ✅ フォームに token を hidden で仕込む（OrderForm用）
+      form.insertAdjacentHTML(
+        "beforeend",
+        `<input type="hidden" name="order_form[token]" value="${result.id}">`
+      );
+
+      // 実カード情報は送らないよう name を外す
+      ["card-number", "card-expiry", "card-cvc"].forEach((id) => {
         document.getElementById(id)?.removeAttribute("name");
       });
 

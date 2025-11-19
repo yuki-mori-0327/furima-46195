@@ -9,9 +9,6 @@
     <%# PAY.JP 公開鍵（本番では環境変数から） %>
     <meta name="payjp-public-key" content="<%= ENV.fetch('PAYJP_PUBLIC_KEY', '') %>">
 
-    <%# PAY.JP v2 %>
-    <script src="https://js.pay.jp/v2/pay.js" data-turbo-track="reload"></script>
-
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
