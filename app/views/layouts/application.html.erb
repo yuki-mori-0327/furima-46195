@@ -1,24 +1,15 @@
-<!DOCTYPE html>
-<html>
-
 <head>
   <title><%= content_for?(:title) ? yield(:title) : "Furima46195" %></title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <%= csrf_meta_tags %>
   <%= csp_meta_tag %>
 
-  <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
-  <%= javascript_importmap_tags %>
-
-  <!-- ▼ PAY.JP 公開鍵（Render の環境変数から読み込む） -->
+  <%# ✅ 公開鍵を meta で渡す %>
   <meta name="payjp-public-key" content="<%= ENV['PAYJP_PUBLIC_KEY'] %>">
 
-  <!-- ▼ PAY.JP v2 の公式スクリプト -->
+  <%# ✅ Pay.jp v2 の JS を読み込む %>
   <script src="https://js.pay.jp/v2/pay.js" data-turbo-track="reload"></script>
+
+  <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+  <%= javascript_importmap_tags %>
 </head>
-
-<body>
-  <%= yield %>
-</body>
-
-</html>

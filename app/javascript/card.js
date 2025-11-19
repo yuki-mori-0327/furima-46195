@@ -55,7 +55,9 @@ const setupPay = () => {
       exp_month,
       exp_year,
     };
-
+    
+     console.log("DEBUG pubKey:", pubKey);          // ← 追加
+     console.log("DEBUG card:", card);             // ← 追加
     // 簡易バリデーション
     const monthOk = /^\d{2}$/.test(exp_month) && +exp_month >= 1 && +exp_month <= 12;
     const yearOk  = /^\d{4}$/.test(exp_year)  && +exp_year  >= 2000 && +exp_year  <= 2099;
@@ -70,8 +72,7 @@ const setupPay = () => {
     try {
       // v2 正式シグネチャ
       const result = await payjp.createToken('card', card);
-  
-      console.log("PAY.JP result:", result);
+      console.log("DEBUG result:", result); 
 
       if (result?.error) {
         console.error(result.error);
