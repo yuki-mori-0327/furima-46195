@@ -1,8 +1,3 @@
-// app/javascript/card.js
-
-// ✅ PAY.JP v2 を importmap 経由で読み込む
-import Payjp from "@payjp/payjs";
-
 // --- 有効期限入力のマスク（Payjpに依存しないで常に動く） ---
 const bindExpiryMask = () => {
   const el = document.getElementById("card-expiry");
