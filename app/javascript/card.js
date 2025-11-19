@@ -1,4 +1,3 @@
-// app/javascript/card.js
 
 // --- 有効期限入力のマスク（Payjpに依存しないで常に動く） ---
 const bindExpiryMask = () => {
@@ -71,14 +70,20 @@ const setupPay = () => {
     try {
       // v2 正式シグネチャ
       const result = await payjp.createToken('card', card);
+  
+      console.log("PAY.JP result:", result);
 
       if (result?.error) {
         console.error(result.error);
         alert(result.error.message || "カードのトークン化に失敗しました。入力内容をご確認ください。");
         return;
       }
+      
+      form.insertAdjacentHTML(
+      "beforeend",
+  `    <input type="hidden" name="order_form[token]" value="${result.id}">`
+       );
 
-      form.insertAdjacentHTML("beforeend", `<input type="hidden" name="token" value="${result.id}">`);
       ["card-number", "card-expiry", "card-cvc"].forEach(id => {
         document.getElementById(id)?.removeAttribute("name");
       });

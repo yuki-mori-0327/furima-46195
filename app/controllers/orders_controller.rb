@@ -8,6 +8,8 @@ class OrdersController < ApplicationController
   end
 
   def create
+    Rails.logger.info "DEBUG params[:token]=#{params[:token].inspect}"
+
     @order_form = OrderForm.new(order_params)
 
     if @order_form.valid?
@@ -34,6 +36,17 @@ class OrdersController < ApplicationController
   end
 
   private
+  
+  def pay_item
+  # 秘密鍵
+  Payjp.api_key = ENV.fetch('PAYJP_SECRET_KEY', nil)
+
+  Payjp::Charge.create(
+    amount: @item.price,            # 商品の値段（integer）
+    card:   @order_form.token,      # フォームオブジェクトに入ったトークン
+    currency: 'jpy'
+  )
+ end
 
   def order_params
     # ★ここは必ず OrderForm/DB のカラム名に合わせること！

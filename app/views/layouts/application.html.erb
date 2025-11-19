@@ -8,8 +8,13 @@
   <%= csp_meta_tag %>
 
   <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
-  <!-- Importmap だけでJSを配信。controllersの include_tag は使わない -->
   <%= javascript_importmap_tags %>
+
+  <!-- ▼ PAY.JP 公開鍵（Render の環境変数から読み込む） -->
+  <meta name="payjp-public-key" content="<%= ENV['PAYJP_PUBLIC_KEY'] %>">
+
+  <!-- ▼ PAY.JP v2 の公式スクリプト -->
+  <script src="https://js.pay.jp/v2/pay.js" data-turbo-track="reload"></script>
 </head>
 
 <body>
