@@ -8,16 +8,15 @@ class OrdersController < ApplicationController
   end
 
   def create
-    Rails.logger.info "DEBUG params[:token]=#{params[:token].inspect}"
-
     @order_form = OrderForm.new(order_params)
+    Rails.logger.info "DEBUG order_form.token=#{@order_form.token.inspect}"
 
     if @order_form.valid?
       begin
-        # 1) 決済（失敗したら以降実行しない）
-        pay_item!(@item.price, @order_form.token)
+        # 1) 決済
+        pay_item
 
-        # 2) 保存（フォームオブジェクト側が transaction で create! している想定）
+        # 2) 保存
         if @order_form.save
           redirect_to root_path, notice: '購入が完了しました'
         else
@@ -36,34 +35,22 @@ class OrdersController < ApplicationController
   end
 
   private
-  
-  def pay_item
-  # 秘密鍵
-  Payjp.api_key = ENV.fetch('PAYJP_SECRET_KEY', nil)
 
-  Payjp::Charge.create(
-    amount: @item.price,            # 商品の値段（integer）
-    card:   @order_form.token,      # フォームオブジェクトに入ったトークン
-    currency: 'jpy'
-  )
- end
-
+  # ✅ OrderForm の属性名に合わせる（postcode / block など）
   def order_params
-    # ★ここは必ず OrderForm/DB のカラム名に合わせること！
-    # 例：postal_code / addresses / phone_number など
     params.require(:order_form)
-          .permit(:postal_code, :prefecture_id, :city, :addresses, :building, :phone_number)
-          .merge(user_id: current_user.id, item_id: @item.id, token: params[:token])
+          .permit(:postcode, :prefecture_id, :city, :block, :building, :phone_number, :token)
+          .merge(user_id: current_user.id, item_id: @item.id)
   end
 
-  def pay_item!(amount, token)
+  # ✅ token は @order_form.token から使う
+  def pay_item
     Payjp.api_key = ENV.fetch('PAYJP_SECRET_KEY')
+
     Payjp::Charge.create(
-      amount: amount,
-      card: token,
-      currency: 'jpy',
-      # 同一リクエストの二重送信対策（任意）
-      idempotency_key: "order-#{@item.id}-user-#{current_user.id}"
+      amount:   @item.price,        # 商品の値段
+      card:     @order_form.token,  # JS で作ったトークン
+      currency: 'jpy'
     )
   end
 
