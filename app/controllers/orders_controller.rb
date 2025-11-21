@@ -1,3 +1,4 @@
+# app/controllers/orders_controller.rb
 class OrdersController < ApplicationController
   before_action :authenticate_user!
   before_action :set_item, only: [:index, :create]
@@ -13,10 +14,10 @@ class OrdersController < ApplicationController
 
     if @order_form.valid?
       begin
-        # 1) 決済
-        pay_item
+        # 1) 決済（PayJP）
+        pay_item(@item.price, @order_form.token)
 
-        # 2) 保存
+        # 2) 購入情報の保存（OrderForm#save 内で Order / Address をまとめて保存）
         if @order_form.save
           redirect_to root_path, notice: '購入が完了しました'
         else
@@ -36,20 +37,24 @@ class OrdersController < ApplicationController
 
   private
 
-  # ✅ OrderForm の属性名に合わせる（postcode / block など）
+  # ★OrderForm の attr_accessor と同じ名前にそろえる
+  #   :postal_code / :addresses を使う
   def order_params
     params.require(:order_form)
-          .permit(:postcode, :prefecture_id, :city, :block, :building, :phone_number, :token)
+          .permit(
+            :postal_code, :prefecture_id, :city, :addresses,
+            :building, :phone_number, :token
+          )
           .merge(user_id: current_user.id, item_id: @item.id)
   end
 
-  # ✅ token は @order_form.token から使う
-  def pay_item
+  # token は @order_form.token を受け取って使う
+  def pay_item(amount, token)
     Payjp.api_key = ENV.fetch('PAYJP_SECRET_KEY')
 
     Payjp::Charge.create(
-      amount:   @item.price,        # 商品の値段
-      card:     @order_form.token,  # JS で作ったトークン
+      amount:   amount,  # 商品の値段（整数）
+      card:     token,   # JS で作ったトークン
       currency: 'jpy'
     )
   end
