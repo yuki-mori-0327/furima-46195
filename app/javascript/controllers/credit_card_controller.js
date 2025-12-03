@@ -8,14 +8,18 @@ export default class extends Controller {
   connect() {
     console.log("credit-card connected");
 
-    // ===== ターゲット確認 =====
-    console.log("hasNumberElementTarget:", this.hasNumberElementTarget);
-    console.log("hasExpiryElementTarget:", this.hasExpiryElementTarget);
-    console.log("hasCvcElementTarget:", this.hasCvcElementTarget);
+    // ===== すでに初期化済みなら何もしない（★重要★） =====
+    if (this.element.dataset.payjpMounted === "true") {
+      console.log("Payjp already mounted, skip connect");
+      return;
+    }
 
-    if (!this.hasNumberElementTarget ||
-        !this.hasExpiryElementTarget ||
-        !this.hasCvcElementTarget) {
+    // ===== ターゲット確認 =====
+    if (
+      !this.hasNumberElementTarget ||
+      !this.hasExpiryElementTarget ||
+      !this.hasCvcElementTarget
+    ) {
       console.error("カード用ターゲットのどれかが見つかりません");
       return;
     }
@@ -34,23 +38,27 @@ export default class extends Controller {
       return;
     }
 
-    const payjp = Payjp(publicKey);
-    this.payjp = payjp;
+    // ===== Payjp インスタンスは window に 1 個だけ共有 =====
+    if (!window.payjpClient) {
+      window.payjpClient = Payjp(publicKey);
+    }
+    const payjp = (this.payjp = window.payjpClient);
     const elements = payjp.elements();
 
     // ===== Elements 作成 =====
     const numberElement = elements.create("cardNumber");
     const expiryElement = elements.create("cardExpiry");
-    const cvcElement    = elements.create("cardCvc");
+    const cvcElement = elements.create("cardCvc");
 
+    // createToken で使う用に保持
     this.numberElement = numberElement;
     this.expiryElement = expiryElement;
-    this.cvcElement    = cvcElement;
+    this.cvcElement = cvcElement;
 
-    // ===== mount（セレクタ文字列で） =====
+    // ===== mount =====
     const numberSelector = `#${this.numberElementTarget.id}`; // #card-number
     const expirySelector = `#${this.expiryElementTarget.id}`; // #card-expiry
-    const cvcSelector    = `#${this.cvcElementTarget.id}`;    // #card-cvc
+    const cvcSelector = `#${this.cvcElementTarget.id}`; // #card-cvc
 
     console.log("mount selectors:", {
       numberSelector,
@@ -68,6 +76,9 @@ export default class extends Controller {
       return;
     }
 
+    // mount 済みフラグ（2回目以降の connect をスキップ）
+    this.element.dataset.payjpMounted = "true";
+
     // どれかでエラーが出たらメッセージ表示
     const handleChange = (event) => {
       if (!this.hasCardErrorTarget) return;
@@ -83,7 +94,13 @@ export default class extends Controller {
       console.error("#charge-form が見つかりません");
       return;
     }
+
+    // submit リスナーも二重登録しないようにする
+    if (form.dataset.payjpSubmitBound === "true") {
+      return;
+    }
     form.addEventListener("submit", this.handleSubmit.bind(this));
+    form.dataset.payjpSubmitBound = "true";
   }
 
   async handleSubmit(event) {
