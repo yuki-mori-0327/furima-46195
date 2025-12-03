@@ -49,12 +49,15 @@ class OrdersController < ApplicationController
   end
 
   # token は @order_form.token を受け取って使う
-  def pay_item(amount, token)
+  def pay_item(token, amount)
+    # 開発環境では Pay.jp にリクエストしないならここで return
+    return if Rails.env.development?
+
     Payjp.api_key = ENV.fetch('PAYJP_SECRET_KEY')
 
     Payjp::Charge.create(
-      amount:   amount,  # 商品の値段（整数）
-      card:     token,   # JS で作ったトークン
+      amount:   amount, # 商品の値段（整数）
+      card:     token,  # JS で作ったトークン
       currency: 'jpy'
     )
   end

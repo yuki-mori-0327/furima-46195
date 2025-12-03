@@ -6,13 +6,14 @@
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
-    <%# PAY.JP 公開鍵（本番では環境変数から） %>
+    <%# PAY.JP 公開鍵 %>
     <meta name="payjp-public-key" content="<%= ENV.fetch('PAYJP_PUBLIC_KEY', '') %>">
-
-    <script src="https://js.pay.jp/v2/pay.js" data-turbo-track="reload"></script>
 
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
+
+    <%# ここに各ページ用の <script> が挿入される %>
+    <%= yield :head %>
   </head>
 
   <body>
