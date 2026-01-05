@@ -36,7 +36,7 @@ RSpec.describe 'ユーザー新規登録', type: :system do
        save_and_open_page
       }.to change { User.count }.by(1)
       # トップページへ遷移する
-      expect(current_path).to eq root_path
+      expect(page).to have_current_path(root_path, wait: 5)
 
       # ログアウトボタンが表示されていることを確認する（クラス名はビューに合わせてね）
       expect(page).to have_content('ログアウト')
