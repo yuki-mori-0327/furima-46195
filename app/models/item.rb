@@ -3,8 +3,8 @@ class Item < ApplicationRecord
 
   # テーブルとのアソシエーション
   belongs_to :user
-  has_one    :order
-  has_one_attached :image 
+  has_one    :order, dependent: :destroy
+  has_one_attached :image
   # has_many :comments
 
   # アクティブハッシュとのアソシエーション
