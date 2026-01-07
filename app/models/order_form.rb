@@ -1,6 +1,6 @@
 class OrderForm
   include ActiveModel::Model
-  include ActiveModel::Validations::Callbacks  
+  include ActiveModel::Validations::Callbacks
 
   attr_accessor :user_id, :item_id,
                 :postal_code, :prefecture_id, :city, :block, :building,
@@ -34,13 +34,13 @@ class OrderForm
       order = Order.create!(user_id: user_id, item_id: item_id)
 
       Address.create!(
-        order_id:      order.id,
-        postal_code:   postal_code,
+        order_id: order.id,
+        postal_code: postal_code,
         prefecture_id: prefecture_id,
-        city:          city,
-        block:         block,     
-        building:      building,
-        phone_number:  phone_number
+        city: city,
+        block: block,
+        building: building,
+        phone_number: phone_number
       )
     end
     true

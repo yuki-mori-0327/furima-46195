@@ -50,7 +50,7 @@ class OrdersController < ApplicationController
     Payjp.api_key = ENV.fetch('PAYJP_SECRET_KEY')
     Payjp::Charge.create(
       amount: amount,
-      card:   token,
+      card: token,
       currency: 'jpy'
     )
   end

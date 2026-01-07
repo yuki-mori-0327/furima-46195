@@ -46,7 +46,10 @@ gem "bootsnap", require: false
 # gem "image_processing", "~> 1.2"
 
 group :development, :test do
-  gem 'rspec-rails'
+  gem "debug", platforms: %i[mri windows]
+  gem "rspec-rails"
+  gem "rubocop", require: false
+  gem "rubocop-rails", require: false
   gem 'factory_bot_rails'
   gem 'faker'
 end

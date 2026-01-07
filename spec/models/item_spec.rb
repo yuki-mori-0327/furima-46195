@@ -1,9 +1,9 @@
 require 'rails_helper'
 RSpec.describe Item, type: :model do
-before do
-  @user = FactoryBot.create(:user)
-   @item = FactoryBot.build(:item, user: @user)
-end
+  before do
+    @user = FactoryBot.create(:user)
+    @item = FactoryBot.build(:item, user: @user)
+  end
   describe '商品の出品登録' do
     context '出品登録ができるとき' do
       it '全ての入力事項が、存在すれば登録できる' do
@@ -26,7 +26,7 @@ end
         expect(@item).to be_valid
       end
       it '発送までの日数が「---」以外であれば登録できる' do
-        @item.scheduled_delivery_id  = 1
+        @item.scheduled_delivery_id = 1
         expect(@item).to be_valid
       end
       it '価格が半角数字でかつ300円〜9,999,999円であれば登録できる' do
@@ -40,7 +40,6 @@ end
         @item.user_id = nil
         @item.valid?
         expect(@item.errors.full_messages).to include("User can't be blank")
-
       end
       it '１枚画像がないと出品できない' do
         @item.image = nil

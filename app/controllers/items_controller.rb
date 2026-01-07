@@ -16,7 +16,7 @@ class ItemsController < ApplicationController
   def create
     @item = current_user.items.build(item_params)
     if @item.save
-      redirect_to @item, notice: "商品を出品しました"
+      redirect_to @item, notice: '商品を出品しました'
     else
       render :new, status: :unprocessable_entity
     end
@@ -27,23 +27,19 @@ class ItemsController < ApplicationController
 
   def update
     if @item.update(item_params)
-      redirect_to @item, notice: "商品を更新しました"
+      redirect_to @item, notice: '商品を更新しました'
     else
       render :edit, status: :unprocessable_entity
     end
   end
 
-  def show; 
+  def show
   end
 
   def destroy
     # ログインしているユーザーと同一であればデータを削除する
-    if @item.user_id == current_user.id
-      @item.destroy
-      redirect_to root_path
-    else
-      redirect_to root_path
-    end
+    @item.destroy if @item.user_id == current_user.id
+    redirect_to root_path
   end
 
   private
@@ -53,11 +49,11 @@ class ItemsController < ApplicationController
   end
 
   def authorize_owner!
-    redirect_to root_path, alert: "権限がありません" unless @item.user_id == current_user.id
+    redirect_to root_path, alert: '権限がありません' unless @item.user_id == current_user.id
   end
 
   def forbid_when_sold!
-    redirect_to root_path, alert: "売却済み商品のため編集できません" if @item.respond_to?(:order) && @item.order.present?
+    redirect_to root_path, alert: '売却済み商品のため編集できません' if @item.respond_to?(:order) && @item.order.present?
   end
 
   def item_params
