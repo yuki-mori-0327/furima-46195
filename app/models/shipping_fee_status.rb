@@ -6,5 +6,8 @@ class ShippingFeeStatus < ActiveHash::Base
   ]
 
   include ActiveHash::Associations
+
+  # rubocop:disable Rails/HasManyOrHasOneDependent
   has_many :items
+  # rubocop:enable Rails/HasManyOrHasOneDependent
 end
