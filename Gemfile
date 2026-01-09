@@ -50,6 +50,8 @@ group :development, :test do
   gem "rspec-rails"
   gem "rubocop", require: false
   gem "rubocop-rails", require: false
+  gem 'factory_bot_rails'
+  gem 'faker'
 end
 
 
@@ -69,6 +71,7 @@ group :test do
   # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
   gem "capybara"
   gem "selenium-webdriver"
+  gem "launchy"
 end
 
 gem 'devise'

@@ -16,7 +16,7 @@ class ApplicationController < ActionController::Base
 
   def basic_auth
     authenticate_or_request_with_http_basic do |u, p|
-      ActiveSupport::SecurityUtils.secure_compare(u.to_s, ENV['BASIC_AUTH_USER'].to_s) &
+      ActiveSupport::SecurityUtils.secure_compare(u.to_s, ENV['BASIC_AUTH_USER'].to_s) &&
         ActiveSupport::SecurityUtils.secure_compare(p.to_s, ENV['BASIC_AUTH_PASSWORD'].to_s)
     end
   end

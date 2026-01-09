@@ -13,10 +13,7 @@ class AdminController < ApplicationController
   end
 
   def storage_switch
-    ActiveStorage::Blob.where(service_name: 'local').find_each do |blob|
-      blob.update!(service_name: 'amazon')
-    end
-
+    ActiveStorage::Blob.where(service_name: 'local').in_batches.update_all(service_name: 'amazon')
     redirect_to admin_storage_fix_path, notice: 'service_name を local→amazon に更新しました'
   end
 
