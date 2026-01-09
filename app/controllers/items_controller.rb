@@ -14,15 +14,15 @@ class ItemsController < ApplicationController
   end
 
   def create
-    @item = current_user.items.build(item_params)
-    if @item.save
-      redirect_to @item, notice: '商品を出品しました'
-    else
+     @item = current_user.items.build(item_params)
+     if @item.save
+       redirect_to root_path, notice: '商品を出品しました'
+     else
       render :new, status: :unprocessable_entity
-    end
-  end
+     end
+   end
 
-  def edit
+def edit
   end
 
   def update

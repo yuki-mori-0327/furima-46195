@@ -1,7 +1,10 @@
 class User < ApplicationRecord
-  # devise のモジュール（たぶんもう書いてあるやつ）
+  # devise のモジュール
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable
+
+  has_many :items, dependent: :destroy
+  has_many :orders
 
   # パスワード：英字＋数字両方含む
   VALID_PASSWORD_REGEX = /\A(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z\d]+\z/
@@ -20,6 +23,7 @@ class User < ApplicationRecord
     validates :birthday
   end
 
-  # パスワード：英数字混在バリデーション（allow_blank 付けないのがポイント）
-  validates :password, format: { with: VALID_PASSWORD_REGEX, message: 'Include both letters and numbers' }
+  # パスワード：英数字混在
+  validates :password,
+            format: { with: VALID_PASSWORD_REGEX, message: 'Include both letters and numbers' }
 end
