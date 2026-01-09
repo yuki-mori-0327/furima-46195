@@ -12,7 +12,9 @@ namespace :storage_fix do
 
   desc "Change local blobs' service_name to amazon"
   task switch: :environment do
-    ActiveStorage::Blob.where(service_name: 'local').in_batches.update_all(service_name: 'amazon')
+    ActiveStorage::Blob.where(service_name: 'local').find_each do |blob|
+      blob.update(service_name: 'amazon')
+    end
     puts '✅ Updated service_name from local → amazon'
   end
 end
