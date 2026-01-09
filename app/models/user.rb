@@ -3,8 +3,8 @@ class User < ApplicationRecord
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable
 
-  has_many :items, dependent: :destroy
-  has_many :orders, dependent: :destroy
+  # has_many :items, dependent: :destroy
+  # has_many :orders, dependent: :destroy
 
   # パスワード：英字＋数字両方含む
   VALID_PASSWORD_REGEX = /\A(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z\d]+\z/

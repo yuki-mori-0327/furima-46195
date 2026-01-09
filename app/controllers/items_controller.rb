@@ -6,7 +6,7 @@ class ItemsController < ApplicationController
   #  before_action :forbid_when_sold!, only: [:edit, :update, :destroy]
 
   def index
-    @items = Item.includes(:user).order(created_at: :desc)
+    #  @items = Item.includes(:user).order(created_at: :desc)
   end
 
   def new

@@ -127,7 +127,7 @@
     <ul class='item-lists'>
 
       <%# 商品データがある場合は、eachメソッドで一覧表示する %>
-    <% @items.each do |item| %>
+    <% (@items || []).each do |item| %>
       <li class='list'>
         <%= link_to item_path(item) do %>
         <div class='item-img-content'>
