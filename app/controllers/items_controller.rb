@@ -1,9 +1,9 @@
 # app/controllers/items_controller.rb
 class ItemsController < ApplicationController
-  before_action :authenticate_user!, only: %i[new create]
-  #  before_action :set_item, only: [:show, :edit, :update, :destroy]
-  #  before_action :authorize_owner!, only: [:edit, :update, :destroy]
-  #  before_action :forbid_when_sold!, only: [:edit, :update, :destroy]
+  before_action :authenticate_user!, only: %i[new create edit update]
+  before_action :set_item, only: %i[show edit update]
+  before_action :authorize_owner!, only: %i[edit update]
+  before_action :forbid_when_sold!, only: %i[edit update]
 
   def index
     @items = Item.includes(:user).order(created_at: :desc)
@@ -22,19 +22,19 @@ class ItemsController < ApplicationController
     end
   end
 
-  # def edit; end
+  def edit
+  end
 
-  # def update
-  #   if @item.update(item_params)
-  #     redirect_to @item, notice: '商品を更新しました'
-  #   else
-  #     render :edit, status: :unprocessable_entity
-  #   end
-  # end
+  def update
+    if @item.update(item_params)
+      redirect_to @item, notice: '商品を更新しました'
+    else
+      render :edit, status: :unprocessable_entity
+    end
+  end
 
-   def show
-    @item = Item.find(params[:id])
-   end
+  def show
+  end
 
   # def destroy
   # ログインしているユーザーと同一であればデータを削除する
@@ -44,17 +44,19 @@ class ItemsController < ApplicationController
 
   private
 
-  #  def set_item
-  #    @item = Item.find(params[:id])
-  #  end
+  def set_item
+    @item = Item.find(params[:id])
+  end
 
-  #  def authorize_owner!
-  #    redirect_to root_path, alert: '権限がありません' unless @item.user_id == current_user.id
-  #  end
+  def authorize_owner!
+    return if current_user && @item.user_id == current_user.id
 
-  #  def forbid_when_sold!
-  #    redirect_to root_path, alert: '売却済み商品のため編集できません' if @item.respond_to?(:order) && @item.order.present?
-  #  end
+    redirect_to root_path, alert: '権限がありません'
+  end
+
+  def forbid_when_sold!
+    redirect_to root_path, alert: '売却済み商品のため編集できません' if @item.respond_to?(:order) && @item.order.present?
+  end
 
   def item_params
     params.require(:item).permit(
