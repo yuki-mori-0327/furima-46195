@@ -26,11 +26,11 @@ class OrdersController < ApplicationController
         flash.now[:alert] = '決済に失敗しました。カード情報をご確認ください。'
         render :index, status: :unprocessable_entity
       end
-    else
-      flash.now[:alert] = '入力内容を確認してください'
-      render :index, status: :unprocessable_entity
-    end
-  end
+      else
+        flash.now[:alert] = '入力内容を確認してください'
+        render :index, status: :unprocessable_entity
+      end
+   end
 
   private
 
