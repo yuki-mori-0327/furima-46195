@@ -32,8 +32,9 @@ class ItemsController < ApplicationController
   #   end
   # end
 
-  # def show
-  # end
+   def show
+    @item = Item.find(params[:id])
+   end
 
   # def destroy
   # ログインしているユーザーと同一であればデータを削除する
