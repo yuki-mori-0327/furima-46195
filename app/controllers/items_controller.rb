@@ -1,9 +1,9 @@
 # app/controllers/items_controller.rb
 class ItemsController < ApplicationController
-  before_action :authenticate_user!, only: %i[new create edit update]
-  before_action :set_item, only: %i[show edit update]
-  before_action :authorize_owner!, only: %i[edit update]
-  before_action :forbid_when_sold!, only: %i[edit update]
+  before_action :authenticate_user!, only: %i[new create edit update destroy]
+  before_action :set_item, only: %i[show edit update destroy]
+  before_action :authorize_owner!, only: %i[edit update destroy]
+  before_action :forbid_when_sold!, only: %i[edit update destroy]
 
   def index
     @items = Item.includes(:user).order(created_at: :desc)
@@ -36,11 +36,10 @@ class ItemsController < ApplicationController
   def show
   end
 
-  # def destroy
-  # ログインしているユーザーと同一であればデータを削除する
-  #   @item.destroy if @item.user_id == current_user.id
-  #   redirect_to root_path
-  #  end
+  def destroy
+    @item.destroy if @item.user_id == current_user.id
+    redirect_to root_path
+  end
 
   private
 
