@@ -1,135 +1,87 @@
-// app/javascript/controllers/credit_card_controller.js
 import { Controller } from "@hotwired/stimulus";
 
-// Pay.jp v2 Elements（cardNumber / cardExpiry / cardCvc 分割）
 export default class extends Controller {
-  static targets = ["numberElement", "expiryElement", "cvcElement", "cardError"];
+  static targets = ["numberElement", "expiryElement", "cvcElement"];
 
   connect() {
-    console.log("credit-card connected");
+    // Turbo などで connect が複数回来ても壊れないようにする
+    if (this.element.dataset.payjpMounted === "true") return;
 
-    // ===== すでに初期化済みなら何もしない（★重要★） =====
-    if (this.element.dataset.payjpMounted === "true") {
-      console.log("Payjp already mounted, skip connect");
-      return;
-    }
-
-    // ===== ターゲット確認 =====
-    if (
-      !this.hasNumberElementTarget ||
-      !this.hasExpiryElementTarget ||
-      !this.hasCvcElementTarget
-    ) {
-      console.error("カード用ターゲットのどれかが見つかりません");
-      return;
-    }
-
-    // ===== 公開鍵を meta から取得 =====
     const meta = document.querySelector('meta[name="payjp-public-key"]');
     if (!meta) {
       console.error("payjp-public-key meta not found");
       return;
     }
-    const publicKey = meta.getAttribute("content");
-    console.log("PAYJP public key:", publicKey);
 
     if (!window.Payjp) {
       console.error("Payjp JS not loaded");
       return;
     }
 
-    // ===== Payjp インスタンスは window に 1 個だけ共有 =====
+    const publicKey = meta.content;
+
+    // ★ Payjp インスタンスは window に 1回だけ
     if (!window.payjpClient) {
       window.payjpClient = Payjp(publicKey);
     }
-    const payjp = (this.payjp = window.payjpClient);
-    const elements = payjp.elements();
+    this.payjp = window.payjpClient;
 
-    // ===== Elements 作成 =====
-    const numberElement = elements.create("cardNumber");
-    const expiryElement = elements.create("cardExpiry");
-    const cvcElement = elements.create("cardCvc");
+    // Elements 生成＆mount
+    const elements = this.payjp.elements();
+    this.cardNumber = elements.create("cardNumber");
+    this.cardExpiry = elements.create("cardExpiry");
+    this.cardCvc = elements.create("cardCvc");
 
-    // createToken で使う用に保持
-    this.numberElement = numberElement;
-    this.expiryElement = expiryElement;
-    this.cvcElement = cvcElement;
+    this.cardNumber.mount("#card-number");
+    this.cardExpiry.mount("#card-expiry");
+    this.cardCvc.mount("#card-cvc");
 
-    // ===== mount =====
-    const numberSelector = `#${this.numberElementTarget.id}`; // #card-number
-    const expirySelector = `#${this.expiryElementTarget.id}`; // #card-expiry
-    const cvcSelector = `#${this.cvcElementTarget.id}`; // #card-cvc
-
-    console.log("mount selectors:", {
-      numberSelector,
-      expirySelector,
-      cvcSelector,
-    });
-
-    try {
-      numberElement.mount(numberSelector);
-      expiryElement.mount(expirySelector);
-      cvcElement.mount(cvcSelector);
-      console.log("Payjp card elements mounted");
-    } catch (e) {
-      console.error("Payjp mount error:", e);
-      return;
-    }
-
-    // mount 済みフラグ（2回目以降の connect をスキップ）
     this.element.dataset.payjpMounted = "true";
 
-    // どれかでエラーが出たらメッセージ表示
-    const handleChange = (event) => {
-      if (!this.hasCardErrorTarget) return;
-      this.cardErrorTarget.textContent = event.error ? event.error.message : "";
-    };
-    numberElement.on("change", handleChange);
-    expiryElement.on("change", handleChange);
-    cvcElement.on("change", handleChange);
-
-    // ===== フォーム submit =====
+    // フォーム submit を 1回だけ bind
     const form = document.getElementById("charge-form");
     if (!form) {
-      console.error("#charge-form が見つかりません");
+      console.error("#charge-form not found");
       return;
     }
+    if (form.dataset.payjpBound === "true") return;
 
-    // submit リスナーも二重登録しないようにする
-    if (form.dataset.payjpSubmitBound === "true") {
-      return;
-    }
     form.addEventListener("submit", this.handleSubmit.bind(this));
-    form.dataset.payjpSubmitBound = "true";
+    form.dataset.payjpBound = "true";
   }
 
   async handleSubmit(event) {
     const tokenInput = document.getElementById("card-token");
-    if (tokenInput && tokenInput.value) return; // 二重送信防止
 
+    // ★ ここで落ちてたのでガードする
+    if (!tokenInput) {
+      console.error("#card-token not found (hidden field id mismatch?)");
+      // tokenが無いならRails側バリデーションに任せて普通に送る
+      return;
+    }
+
+    // すでに token が入ってるなら二重送信防止で何もしない
+    if (tokenInput.value) return;
+
+    // token 作ってから送るので一旦止める
     event.preventDefault();
 
     try {
-      // 分割Elementの場合も、トークン作成は cardNumber 要素を渡す
-      const result = await this.payjp.createToken(this.numberElement);
-      console.log("payjp result:", result);
+      const result = await this.payjp.createToken(this.cardNumber);
 
+      // ★ JSでは表示しない（Rails側のエラーに寄せる）
       if (result.error) {
-        if (this.hasCardErrorTarget) {
-          this.cardErrorTarget.textContent = result.error.message;
-        } else {
-          alert(result.error.message);
-        }
+        // tokenは空のまま送る → Railsで「Token can't be blank」などを出す
+        event.target.submit();
         return;
       }
 
-      const token = result.id;
-      if (tokenInput) tokenInput.value = token;
-
+      tokenInput.value = result.id;
       event.target.submit();
     } catch (e) {
       console.error("Payjp createToken error:", e);
-      alert("カード決済通信でエラーが発生しました。時間をおいて再度お試しください。");
+      // 例外時もRailsに寄せる（token空で送る）
+      event.target.submit();
     }
   }
 }

@@ -8,7 +8,7 @@
 
     <%# 購入内容の表示 %>
     <div class='buy-item-info'>
-      <%= image_tag @item.image.variant(resize: '500x500'), class: 'buy-item-img' %>
+     <%= image_tag url_for(@item.image), class: 'buy-item-img' if @item.image.attached? %>
       <div class='buy-item-right-content'>
         <h2 class='buy-item-text'>
           <%= @item.name %>
@@ -33,18 +33,16 @@
     <%# /支払額の表示 %>
 
     <%= form_with(model: @order_form, url: item_orders_path(@item),
-                  id: 'charge-form', class: 'transaction-form-wrap', local: true) do |f| %>
+           id: 'charge-form', class: 'transaction-form-wrap', local: true,
+           data: { controller: "credit-card" }) do |f| %>
 
-      <%= render 'shared/error_messages', model: f.object %>
+    <%= render 'shared/error_messages', model: f.object %>
 
-      <%# Pay.jp から受け取るトークンを入れる hidden フィールド %>
-      <%= f.hidden_field :token, id: 'card-token' %>
+    <%= f.hidden_field :token, id: 'card-token' %>
 
-  <%# カード情報の入力（番号 / 有効期限 / CVC を分割） %>
-  <div class='credit-card-form' data-controller="credit-card">
-    <h1 class='info-input-haedline'>
-      クレジットカード情報入力
-    </h1>
+      <h1 class='info-input-haedline'>
+        クレジットカード情報入力
+      </h1>
 
     <%# カード番号 + ロゴ %>
     <div class="form-group">
@@ -89,7 +87,6 @@
     <%# エラーメッセージ %>
     <small class="hint"
            data-credit-card-target="cardError"></small>
-  </div>
 
       <%# 配送先の入力 %>
       <div class='shipping-address-form'>

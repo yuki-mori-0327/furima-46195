@@ -47,6 +47,8 @@ class OrdersController < ApplicationController
   end
 
   def pay_item(amount, token)
+    return if Rails.env.development?
+
     Payjp.api_key = ENV.fetch('PAYJP_SECRET_KEY')
     Payjp::Charge.create(
       amount: amount,
