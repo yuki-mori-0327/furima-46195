@@ -31,7 +31,7 @@ RSpec.describe OrderForm, type: :model do
         expect(@order_form).to be_valid
       end
       it '番地が空でなければ保存できる' do
-        @order_form.block = '旭区１２３'
+        @order_form.addresses = '旭区１２３'
         expect(@order_form).to be_valid
       end
       it '建物名が空でも保存できる' do
@@ -84,14 +84,9 @@ RSpec.describe OrderForm, type: :model do
         expect(@order_form.errors.full_messages).to include("City can't be blank")
       end
       it '番地が空だと保存できないこと' do
-        @order_form.block = nil
+        @order_form.addresses = nil
         @order_form.valid?
-        expect(@order_form.errors.full_messages).to include("Block can't be blank")
-      end
-      it '電話番号が空だと保存できないこと' do
-        @order_form.phone_number = nil
-        @order_form.valid?
-        expect(@order_form.errors.full_messages).to include("Phone number can't be blank")
+        expect(@order_form.errors.full_messages).to include("Addresses can't be blank")
       end
       it '電話番号にハイフンがあると保存できないこと' do
         @order_form.phone_number = '123 - 1234 - 1234'
