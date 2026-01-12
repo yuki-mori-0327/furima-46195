@@ -1,3 +1,4 @@
+# app/models/order_form.rb
 class OrderForm
   include ActiveModel::Model
   include ActiveModel::Validations::Callbacks
@@ -5,15 +6,6 @@ class OrderForm
   attr_accessor :postal_code, :prefecture_id, :city,
                 :addresses, :building, :phone_number,
                 :user_id, :item_id, :token
-
-  # spec/factory 用（block = 番地）
-  def block
-    addresses
-  end
-
-  def block=(value)
-    self.addresses = value
-  end
 
   before_validation :normalize_fields
 
@@ -26,9 +18,7 @@ class OrderForm
                         message: 'is invalid. Include hyphen(-)' }
 
     validates :city
-
-    # ★ここ重要：addresses ではなく block で検証
-    validates :block
+    validates :addresses
 
     validates :phone_number,
               format: { with: /\A\d{10,11}\z/,
@@ -64,6 +54,7 @@ class OrderForm
   def normalize_fields
     self.postal_code  = to_hankaku(postal_code).to_s
     self.phone_number = to_hankaku(phone_number).to_s.gsub(/-/, '')
+
     self.prefecture_id = prefecture_id.to_i if prefecture_id.present?
   end
 
