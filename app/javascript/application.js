@@ -16,22 +16,31 @@ function setupPriceCalc() {
   input.dataset.priceListener = "true";
 
   const recalc = () => {
-    const raw   = (input.value || "").replace(/[^\d]/g, "");
-    const price = Number(raw);
+  const raw = (input.value || "").replace(/[^\d]/g, "");
 
-    // ✅ エラーハンドリング後も「毎回表示」させる（0を出す）
-    if (!Number.isFinite(price) || price < 300 || price > 9_999_999) {
-      feeEl.textContent  = "0";
-      profEl.textContent = "0";
-      return;
-    }
+  // ✅ 未入力なら空（＝「円」だけ表示）
+  if (raw === "") {
+    feeEl.textContent  = "";
+    profEl.textContent = "";
+    return;
+  }
 
-    const fee    = Math.floor(price * 0.10);
-    const profit = price - fee;
+  const price = Number(raw);
 
-    feeEl.textContent  = fee.toLocaleString();
-    profEl.textContent = profit.toLocaleString();
-  };
+  // ✅ 数字は入ってるけど範囲外なら 0 にする（今の仕様を維持するなら）
+  if (!Number.isFinite(price) || price < 300 || price > 9_999_999) {
+    feeEl.textContent  = "0";
+    profEl.textContent = "0";
+    return;
+  }
+
+  const fee    = Math.floor(price * 0.10);
+  const profit = price - fee;
+
+  feeEl.textContent  = fee.toLocaleString();
+  profEl.textContent = profit.toLocaleString();
+};
+
 
   input.addEventListener("input", recalc);
   recalc();
