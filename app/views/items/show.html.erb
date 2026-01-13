@@ -7,7 +7,10 @@
       <%= @item.name %>
     </h2>
     <div class='item-img-content'>
-      <%= image_tag url_for(@item.image), class: "item-img" if @item.image.attached? %>
+       <% if @item.image.attached? %>
+     <%= image_tag @item.image, class: "item-box-img" %>
+   <% end %>
+
 
       <%# 商品が売れている場合は、sold outを表示 %>
       <% if @item.order != nil %>
@@ -18,7 +21,7 @@
     </div>
     <div class="item-price-box">
       <span class="item-price">
-        <%= @item.price %>円
+        ￥ <%= @item.price %>
       </span>
       <span class="item-postage">
         <%= @item.shipping_fee_status.name %>
