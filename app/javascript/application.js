@@ -3,7 +3,7 @@ import "@hotwired/turbo-rails"
 import * as ActiveStorage from "@rails/activestorage"
 ActiveStorage.start()
 
-import "controllers"  
+import "controllers"
 
 function setupPriceCalc() {
   const input  = document.getElementById("item-price");
@@ -11,12 +11,20 @@ function setupPriceCalc() {
   const profEl = document.getElementById("profit");
   if (!input || !feeEl || !profEl) return;
 
-  const recalc = () => {
-    const raw   = (input.value || "").replace(/,/g, "").trim();
-    const price = Number(raw);
-    const clear = () => { feeEl.textContent = ""; profEl.textContent = ""; };
+  // ✅ Turboで再実行されても1回だけ
+  if (input.dataset.priceListener === "true") return;
+  input.dataset.priceListener = "true";
 
-    if (!Number.isFinite(price) || price < 300 || price > 9999999) return clear();
+  const recalc = () => {
+    const raw   = (input.value || "").replace(/[^\d]/g, "");
+    const price = Number(raw);
+
+    // ✅ エラーハンドリング後も「毎回表示」させる（0を出す）
+    if (!Number.isFinite(price) || price < 300 || price > 9_999_999) {
+      feeEl.textContent  = "0";
+      profEl.textContent = "0";
+      return;
+    }
 
     const fee    = Math.floor(price * 0.10);
     const profit = price - fee;
@@ -25,10 +33,10 @@ function setupPriceCalc() {
     profEl.textContent = profit.toLocaleString();
   };
 
-  input.addEventListener("input",  recalc);
-  input.addEventListener("change", recalc);
+  input.addEventListener("input", recalc);
   recalc();
 }
 
-document.addEventListener("turbo:load",       setupPriceCalc);
-document.addEventListener("DOMContentLoaded", setupPriceCalc);
+// ✅ TurboだけでOK（DOMContentLoadedは不要＆重複の元）
+document.addEventListener("turbo:load", setupPriceCalc);
+document.addEventListener("turbo:render", setupPriceCalc);

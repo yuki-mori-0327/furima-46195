@@ -26,18 +26,14 @@
     </div>
 
   <%# ログイン中であれば表示 %>
-  <% if user_signed_in? %> 
-    <%# 出品者かつ未購入品であれば、編集・削除を表示 %>
-    <% if current_user.id == @item.user_id && @item.order.nil? %> 
-    <%= link_to '商品の編集', edit_item_path(@item), class: "item-red-btn" %>
-    <p class='or-text'>or</p>
-    <%= link_to "削除", item_path(@item), data: { turbo_method: :delete }, class:"item-destroy" %>
-    <%# 未購入品でない場合には、売り切れを表示 %>
-    <% elsif @item.order.present? %>
-    <%# 売り切れ時は何も表示しない %>
-    <% else %>
-    <%= link_to '購入画面に進む', item_orders_path(@item), class:"item-red-btn"%>
-   <% end %>
+  <% if user_signed_in? %>
+    <% if current_user.id == @item.user_id && @item.order.nil? %>
+      <%= link_to '商品の編集', edit_item_path(@item), class: "item-red-btn" %>
+      <p class='or-text'>or</p>
+      <%= link_to "削除", item_path(@item), data: { turbo_method: :delete }, class:"item-destroy" %>
+    <% elsif current_user.id != @item.user_id && @item.order.nil? %>
+      <%= link_to '購入画面に進む', item_orders_path(@item), class:"item-red-btn" %>
+    <% end %>
   <% end %>
 
     <div class="item-explain-box">

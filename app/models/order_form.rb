@@ -1,4 +1,3 @@
-# app/models/order_form.rb
 class OrderForm
   include ActiveModel::Model
   include ActiveModel::Validations::Callbacks
@@ -6,6 +5,15 @@ class OrderForm
   attr_accessor :postal_code, :prefecture_id, :city,
                 :addresses, :building, :phone_number,
                 :user_id, :item_id, :token
+
+
+  def block
+    addresses
+  end
+
+  def block=(value)
+    self.addresses = value
+  end
 
   before_validation :normalize_fields
 
@@ -62,6 +70,7 @@ class OrderForm
     return str if str.blank?
 
     s = str.to_s.unicode_normalize(:nfkc)
+
     s.gsub(/[‐-‒–—―−ーｰ]/, '-')
   end
 end
